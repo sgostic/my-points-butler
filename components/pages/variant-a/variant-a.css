@@ -253,6 +253,11 @@ a { color: inherit; text-decoration: none; }
 .pb-savings-ribbon { margin-top: auto; padding-top: 18px; font-size: 15px; color: var(--ink-soft); font-weight: 600; }
 .pb-savings-ribbon strong { color: var(--save-deep); font-weight: 800; }
 .pb-savings-ribbon.now strong { color: var(--now-deep); }
+.pb-vc-cta { width: 100%; margin-top: 16px; font-family: var(--font-body); font-weight: 700; font-size: 15px;
+  color: #fff; background: var(--accent, var(--brand)); border: 0; border-radius: 12px; padding: 13px; cursor: pointer;
+  box-shadow: 0 8px 20px rgba(31,20,16,.16); transition: filter .15s, transform .1s; }
+.pb-vc-cta:hover { filter: brightness(1.06); }
+.pb-vc-cta:active { transform: translateY(1px); }
 
 /* ---------- Table ---------- */
 .pb-table-wrap { background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: var(--shadow-sm); }

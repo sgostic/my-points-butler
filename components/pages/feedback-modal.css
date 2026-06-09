@@ -1,0 +1,172 @@
+/* Shared prototype-feedback modal. Self-contained (pb-fb- prefix) so it renders
+   correctly in any variant. Relies only on base tokens from variant-a.css. */
+
+.pb-fb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(31, 20, 16, 0.5);
+  backdrop-filter: blur(4px);
+  animation: pb-fb-fade 0.18s ease;
+}
+@keyframes pb-fb-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pb-fb-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: 22px;
+  padding: 26px;
+  box-shadow: 0 24px 60px rgba(31, 20, 16, 0.3);
+  animation: pb-fb-pop 0.2s ease;
+}
+@keyframes pb-fb-pop {
+  from { transform: translateY(12px) scale(0.98); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.pb-fb-x {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pb-fb-x:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+.pb-fb-disclaimer {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, #E8A23D 16%, #fff);
+  border: 1px solid color-mix(in srgb, #E8A23D 45%, #fff);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+
+.pb-fb-title {
+  font-family: var(--font-head);
+  font-size: 22px;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+
+.pb-fb-field { display: block; margin-bottom: 16px; }
+.pb-fb-label {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 7px;
+}
+
+.pb-fb-textarea,
+.pb-fb-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+.pb-fb-textarea:focus,
+.pb-fb-input:focus { outline: none; border-color: var(--save); }
+
+.pb-fb-scale { display: flex; gap: 8px; }
+.pb-fb-opt {
+  flex: 1;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink-soft);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pb-fb-opt:hover { border-color: var(--ink-soft); }
+.pb-fb-opt.is-on {
+  color: #fff;
+  background: var(--save);
+  border-color: var(--save);
+}
+
+.pb-fb-foot { display: flex; gap: 10px; margin-top: 22px; }
+.pb-fb-submit {
+  flex: 1;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  background: var(--save);
+  border: 0;
+  border-radius: 12px;
+  padding: 13px;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.pb-fb-submit:hover { filter: brightness(1.05); }
+.pb-fb-skip {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink-soft);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 13px 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pb-fb-skip:hover { border-color: var(--ink-soft); color: var(--ink); }
+
+.pb-fb-done { text-align: center; padding: 10px 0; }
+.pb-fb-check {
+  width: 56px;
+  height: 56px;
+  margin: 8px auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+  background: var(--save);
+}
+.pb-fb-copy {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 8px auto 20px;
+  max-width: 36ch;
+}
+
+@media (max-width: 560px) {
+  .pb-fb-foot { flex-direction: column; }
+}

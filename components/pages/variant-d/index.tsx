@@ -15,6 +15,7 @@ import {
   type Destination,
 } from "../variant-a/data";
 import { PBModeNav } from "../mode-nav";
+import { PBFeedbackModal } from "../feedback-modal";
 import "../variant-a/variant-a.css";
 import "../variant-b/variant-b.css";
 import "./variant-d.css";
@@ -191,6 +192,7 @@ function PBDealModal({
 }) {
   const { d, pct, cost, affordable, gap } = s;
   const sum = summarize(d);
+  const [feedback, setFeedback] = useState(false);
 
   // Close on Escape.
   useEffect(() => {
@@ -297,7 +299,7 @@ function PBDealModal({
 
         <div className="pb-modal-foot">
           {affordable ? (
-            <button type="button" className="pb-modal-book">
+            <button type="button" className="pb-modal-book" onClick={() => setFeedback(true)}>
               Book with {fmt(cost)} pts →
             </button>
           ) : (
@@ -310,6 +312,9 @@ function PBDealModal({
           </button>
         </div>
       </div>
+      {feedback && (
+        <PBFeedbackModal context={`Book ${d.city}`} onClose={() => setFeedback(false)} />
+      )}
     </div>
   );
 }

@@ -65,6 +65,10 @@
 .pb-goal-rec { font-size: 14px; color: var(--ink-soft); font-weight: 600; }
 .pb-goal-boost { width: 100%; font-size: 13px; color: var(--wait-deep); background: color-mix(in srgb, var(--wait) 10%, #fff);
   border: 1px solid color-mix(in srgb, var(--wait) 26%, #fff); border-radius: 10px; padding: 8px 12px; }
+.pb-goal-book { margin-left: auto; font-family: var(--font-body); font-weight: 700; font-size: 14px; color: #fff;
+  background: var(--save); border: 0; border-radius: 11px; padding: 10px 18px; cursor: pointer; transition: filter .15s, transform .1s; }
+.pb-goal-book:hover { filter: brightness(1.06); }
+.pb-goal-book:active { transform: translateY(1px); }
 
 /* extra badge tone for "earn" */
 .pb-mbadge.is-now { background: color-mix(in srgb, var(--now) 16%, #fff); color: var(--now-deep); border: 1px solid color-mix(in srgb, var(--now) 38%, #fff); }

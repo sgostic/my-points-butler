@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { DESTINATIONS, summarize, fmt, type Destination } from "../variant-a/data";
 import { WorldMap } from "../variant-a/world-map";
+import { PBFeedbackModal } from "../feedback-modal";
 import {
   PB_PROGRAMS,
   pbPools,
@@ -338,8 +339,16 @@ function PBMatchSummary({ dest, ws }: { dest: Destination; ws: WalletSummary }) 
 function PBAlertCTA({ dest, pools, ws }: { dest: Destination; pools: Pools; ws: WalletSummary }) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [feedback, setFeedback] = useState(false);
   const watching = ws.wait.length + ws.short.length;
   const valid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+
+  // The alert isn't really wired to a backend — confirm the (mock) success and
+  // prompt the tester for feedback.
+  const setAlert = () => {
+    setSent(true);
+    setFeedback(true);
+  };
 
   return (
     <div className="pb-al">
@@ -359,10 +368,10 @@ function PBAlertCTA({ dest, pools, ws }: { dest: Destination; pools: Pools; ws: 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && valid) setSent(true);
+                if (e.key === "Enter" && valid) setAlert();
               }}
             />
-            <button type="button" className="pb-al-btn" disabled={!valid} onClick={() => setSent(true)}>
+            <button type="button" className="pb-al-btn" disabled={!valid} onClick={setAlert}>
               Alert me
             </button>
           </div>
@@ -389,6 +398,9 @@ function PBAlertCTA({ dest, pools, ws }: { dest: Destination; pools: Pools; ws: 
             Edit alert
           </button>
         </div>
+      )}
+      {feedback && (
+        <PBFeedbackModal context={`${dest.city} deal alert`} onClose={() => setFeedback(false)} />
       )}
     </div>
   );

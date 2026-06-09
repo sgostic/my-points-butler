@@ -16,6 +16,7 @@ import {
   type Tone,
 } from "./data";
 import { WorldMap } from "./world-map";
+import { PBFeedbackModal } from "../feedback-modal";
 import "./variant-a.css";
 
 const TONE_VAR: Record<Tone, string> = {
@@ -123,6 +124,7 @@ function PBVerdict({
   framing: number;
   balance: number;
 }) {
+  const [feedback, setFeedback] = useState(false);
   const best = summary.best;
   const tone = summary.tone;
   const save = Math.abs(best.v.save);
@@ -215,7 +217,17 @@ function PBVerdict({
             You save <strong>{fmt(save)} miles</strong> · {pct}% off by waiting
           </div>
         )}
+        <button type="button" className="pb-vc-cta" onClick={() => setFeedback(true)}>
+          {tone === "now"
+            ? `Book ${best.o.name} now →`
+            : tone === "neutral"
+            ? `Use my points on ${dest.city} →`
+            : `Remind me to book ${dest.city} →`}
+        </button>
       </div>
+      {feedback && (
+        <PBFeedbackModal context={`${best.o.name} · ${dest.city}`} onClose={() => setFeedback(false)} />
+      )}
     </div>
   );
 }

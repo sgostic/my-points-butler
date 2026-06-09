@@ -8,6 +8,7 @@ import { useState } from "react";
 import { DESTINATIONS, fmt } from "../variant-a/data";
 import { WorldMap } from "../variant-a/world-map";
 import { PBModeNav } from "../mode-nav";
+import { PBFeedbackModal } from "../feedback-modal";
 import { pbEta, pbPlanGoals, type GoalPlan } from "./goals";
 import "../variant-a/variant-a.css";
 import "../variant-b/variant-b.css";
@@ -117,6 +118,7 @@ function PBGoalCard({
 }) {
   const { dest } = plan;
   const pct = Math.round(plan.pct * 100);
+  const [feedback, setFeedback] = useState(false);
   const REC = {
     use: { c: "save", k: "Use now", t: "You've got enough — book the dream." },
     save: { c: "wait", k: "Keep saving", t: `On track for ${plan.eta} at this rate.` },
@@ -194,8 +196,16 @@ function PBGoalCard({
               💳 A new-card bonus (~60k) gets you there by {pbEta(Math.max(0, plan.months - 4))}
             </span>
           )}
+          {plan.status === "use" && (
+            <button type="button" className="pb-goal-book" onClick={() => setFeedback(true)}>
+              Book {dest.city} now →
+            </button>
+          )}
         </div>
       </div>
+      {feedback && (
+        <PBFeedbackModal context={`Book ${dest.city}`} onClose={() => setFeedback(false)} />
+      )}
     </div>
   );
 }
