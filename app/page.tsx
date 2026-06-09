@@ -9,4 +9,3 @@ export default async function Home({
   const SelectedVariant = VARIANTS[resolveVariant(variant)];
   return <SelectedVariant />;
 }
-
