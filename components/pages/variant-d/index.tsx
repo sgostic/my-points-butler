@@ -82,6 +82,19 @@ function PBTasteBar({
         </label>
         <button
           type="button"
+          className="pb-show-options"
+          onClick={() => {
+            const el = document.getElementById("discover");
+            if (el) {
+              const top = el.getBoundingClientRect().top + window.scrollY - 80;
+              window.scrollTo({ top, behavior: "smooth" });
+            }
+          }}
+        >
+          Show options
+        </button>
+        <button
+          type="button"
           className={"pb-fits" + (fitsOnly ? " is-on" : "")}
           aria-pressed={fitsOnly}
           onClick={() => onFits(!fitsOnly)}

@@ -16,20 +16,25 @@ import "./variant-c.css";
 const DOT_COLOR = "#C2AE9F";
 const DEFAULT_GOALS = ["tokyo", "maldives", "capetown"];
 
+/* Approximate points earned per $1 spent on a rewards card (blended rate). */
+const PTS_PER_DOLLAR = 1.5;
+const earnFromSpend = (spend: number) => Math.round(spend * PTS_PER_DOLLAR);
+
 /* ---------- Points engine (inputs + roll-up) ---------- */
 function PBGoalsEngine({
   current,
-  monthly,
+  spend,
   onCurrent,
-  onMonthly,
+  onSpend,
   plans,
 }: {
   current: number;
-  monthly: number;
+  spend: number;
   onCurrent: (n: number) => void;
-  onMonthly: (n: number) => void;
+  onSpend: (n: number) => void;
   plans: GoalPlan[];
 }) {
+  const monthly = earnFromSpend(spend);
   const totalTarget = plans.reduce((s, p) => s + p.target, 0);
   const totalFunded = Math.min(current, totalTarget);
   const pct = totalTarget ? Math.round((totalFunded / totalTarget) * 100) : 0;
@@ -41,7 +46,7 @@ function PBGoalsEngine({
       <div className="pb-wallet-head">
         <div>
           <div className="pb-wallet-title">Your points engine</div>
-          <div className="pb-wallet-sub">What you hold and how fast you earn.</div>
+          <div className="pb-wallet-sub">What you hold and how much you spend.</div>
         </div>
       </div>
 
@@ -57,20 +62,22 @@ function PBGoalsEngine({
         </label>
         <div className="pb-field pb-field-grow">
           <span className="pb-field-label">
-            Earning <strong className="pb-eng-rate">+{fmt(monthly)}</strong> / month
+            Spending <strong className="pb-eng-rate">${fmt(spend)}</strong> / month ·{" "}
+            <span className="pb-eng-earn">≈ +{fmt(monthly)} pts</span>
           </span>
           <input
             className="pb-range"
             type="range"
             min={0}
-            max={50000}
-            step={1000}
-            value={monthly}
-            onChange={(e) => onMonthly(parseInt(e.target.value, 10))}
+            max={30000}
+            step={500}
+            value={spend}
+            onChange={(e) => onSpend(parseInt(e.target.value, 10))}
           />
           <div className="pb-range-scale">
-            <span>0</span>
-            <span>50k / mo</span>
+            <span>$0</span>
+            <span>~{PTS_PER_DOLLAR} pts / $1</span>
+            <span>$30k / mo</span>
           </div>
         </div>
       </div>
@@ -197,17 +204,17 @@ function PBHeroGoals({
   goalIds,
   onToggle,
   current,
-  monthly,
+  spend,
   onCurrent,
-  onMonthly,
+  onSpend,
   plans,
 }: {
   goalIds: string[];
   onToggle: (id: string) => void;
   current: number;
-  monthly: number;
+  spend: number;
   onCurrent: (n: number) => void;
-  onMonthly: (n: number) => void;
+  onSpend: (n: number) => void;
   plans: GoalPlan[];
 }) {
   const pinned = DESTINATIONS.map((d) => ({
@@ -234,9 +241,9 @@ function PBHeroGoals({
         <div className="pb-hero-grid">
           <PBGoalsEngine
             current={current}
-            monthly={monthly}
+            spend={spend}
             onCurrent={onCurrent}
-            onMonthly={onMonthly}
+            onSpend={onSpend}
             plans={plans}
           />
           <div className="pb-map-card pb-map-card-sm">
@@ -318,12 +325,12 @@ function PBFooter() {
 export default function VariantC() {
   const [goalIds, setGoalIds] = useState(DEFAULT_GOALS);
   const [current, setCurrent] = useState(206000);
-  const [monthly, setMonthly] = useState(18000);
+  const [spend, setSpend] = useState(12000);
 
   const goals = goalIds
     .map((id) => ({ id, dest: DESTINATIONS.find((d) => d.id === id) }))
     .filter((g): g is { id: string; dest: (typeof DESTINATIONS)[number] } => Boolean(g.dest));
-  const plans = pbPlanGoals(goals, current, monthly);
+  const plans = pbPlanGoals(goals, current, earnFromSpend(spend));
 
   const onToggle = (id: string) => {
     // Add a newly-tracked trip at the top (highest priority) so it's funded
@@ -358,9 +365,9 @@ export default function VariantC() {
         goalIds={goalIds}
         onToggle={onToggle}
         current={current}
-        monthly={monthly}
+        spend={spend}
         onCurrent={setCurrent}
-        onMonthly={setMonthly}
+        onSpend={setSpend}
         plans={plans}
       />
       <section className="pb-compare" id="goals">
