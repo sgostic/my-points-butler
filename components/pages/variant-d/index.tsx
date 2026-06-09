@@ -4,8 +4,16 @@
    "See trips you can book with your current points, based on places you like."
    Reuses Variant A's data and the shared alerts/base styles. */
 
-import { useState } from "react";
-import { DESTINATIONS, INTERESTS, tripCost, fmt, type Destination } from "../variant-a/data";
+import { useEffect, useState } from "react";
+import {
+  DESTINATIONS,
+  INTERESTS,
+  tripCost,
+  fmt,
+  summarize,
+  verdictFor,
+  type Destination,
+} from "../variant-a/data";
 import { PBModeNav } from "../mode-nav";
 import "../variant-a/variant-a.css";
 import "../variant-b/variant-b.css";
@@ -88,10 +96,23 @@ function PBTasteBar({
   );
 }
 
-function PBTripCard({ s, selected }: { s: ScoredTrip; selected: string[] }) {
+function PBTripCard({
+  s,
+  selected,
+  onOpen,
+}: {
+  s: ScoredTrip;
+  selected: string[];
+  onOpen: (s: ScoredTrip) => void;
+}) {
   const { d, pct, cost, affordable, gap } = s;
+  // Fade cards that match your vibe less; full opacity when no vibe is picked.
+  const vibeOpacity = pct == null ? 1 : 0.5 + (pct / 100) * 0.5;
   return (
-    <article className="pb-trip" style={{ "--accent": d.accent } as React.CSSProperties}>
+    <article
+      className="pb-trip"
+      style={{ "--accent": d.accent, "--vibe-opacity": vibeOpacity } as React.CSSProperties}
+    >
       <div className="pb-trip-top">
         <span className="pb-trip-flag">{d.flag}</span>
         {pct != null && (
@@ -136,11 +157,147 @@ function PBTripCard({ s, selected }: { s: ScoredTrip; selected: string[] }) {
             </span>
           )}
         </div>
-        <button type="button" className="pb-trip-cta">
+        <button type="button" className="pb-trip-cta" onClick={() => onOpen(s)}>
           See the deal →
         </button>
       </div>
     </article>
+  );
+}
+
+function PBDealModal({
+  s,
+  points,
+  selected,
+  onClose,
+}: {
+  s: ScoredTrip;
+  points: number;
+  selected: string[];
+  onClose: () => void;
+}) {
+  const { d, pct, cost, affordable, gap } = s;
+  const sum = summarize(d);
+
+  // Close on Escape.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const flight = d.flights.reduce((a, b) => (b.now < a.now ? b : a));
+  const hotel = d.hotels.reduce((a, b) => (b.now < a.now ? b : a));
+  const laterCost = tripCost(d, "later", 3);
+  const waitSave = cost - laterCost;
+
+  const rows = [
+    { label: "Cheapest flight", offer: flight, mult: 1 },
+    { label: "Hotel × 3 nights", offer: hotel, mult: 3 },
+  ];
+
+  return (
+    <div className="pb-modal-overlay" role="dialog" aria-modal="true" onClick={onClose}>
+      <div
+        className="pb-modal"
+        style={{ "--accent": d.accent } as React.CSSProperties}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button type="button" className="pb-modal-x" aria-label="Close" onClick={onClose}>
+          ✕
+        </button>
+        <div className="pb-modal-head">
+          <span className="pb-modal-flag">{d.flag}</span>
+          <div className="pb-modal-loc">
+            <span className="pb-modal-city">{d.city}</span>
+            <span className="pb-modal-country">{d.country}</span>
+          </div>
+          {pct != null && (
+            <span className="pb-trip-match pb-modal-match">
+              <span className="pb-trip-match-n">{pct}%</span> your vibe
+            </span>
+          )}
+        </div>
+
+        <p className="pb-modal-vibe">{d.vibe}</p>
+
+        <div className="pb-modal-tags">
+          {d.tags.map((tag) => (
+            <span key={tag} className={"pb-ttag" + (selected.includes(tag) ? " is-match" : "")}>
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <div className="pb-modal-section">
+          <span className="pb-modal-section-t">What&apos;s in this 3-night deal</span>
+          <table className="pb-modal-table">
+            <tbody>
+              {rows.map((r) => {
+                const v = verdictFor(r.offer.now, r.offer.later);
+                return (
+                  <tr key={r.label}>
+                    <td>
+                      <span className="pb-modal-tname">{r.offer.name}</span>
+                      <span className="pb-modal-tsub">{r.offer.sub}</span>
+                    </td>
+                    <td className="pb-modal-tnum">
+                      {fmt(r.offer.now * r.mult)} <span>pts</span>
+                    </td>
+                    <td>
+                      <span className={"pb-mbadge sm " + (v.tone === "save" ? "is-save" : v.tone === "now" ? "is-now" : "")}>
+                        {v.label}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="pb-modal-grid">
+          <div className="pb-modal-stat">
+            <span className="pb-modal-stat-l">Total now</span>
+            <span className="pb-modal-stat-n">{fmt(cost)} pts</span>
+          </div>
+          <div className="pb-modal-stat">
+            <span className="pb-modal-stat-l">Your balance</span>
+            <span className="pb-modal-stat-n">{fmt(points)} pts</span>
+          </div>
+          <div className="pb-modal-stat">
+            <span className="pb-modal-stat-l">{affordable ? "Left after booking" : "Still short"}</span>
+            <span className={"pb-modal-stat-n" + (affordable ? " is-save" : " is-now")}>
+              {affordable ? fmt(points - cost) : fmt(gap)} pts
+            </span>
+          </div>
+        </div>
+
+        {waitSave > 0 && (
+          <div className="pb-modal-tip">
+            💡 Butler&apos;s take: waiting for <strong>{sum.window}</strong> could drop this trip to{" "}
+            <strong>{fmt(laterCost)} pts</strong> — about <strong>{fmt(waitSave)} pts</strong> saved.
+          </div>
+        )}
+
+        <div className="pb-modal-foot">
+          {affordable ? (
+            <button type="button" className="pb-modal-book">
+              Book with {fmt(cost)} pts →
+            </button>
+          ) : (
+            <button type="button" className="pb-modal-book is-locked" disabled>
+              {fmt(gap)} pts short
+            </button>
+          )}
+          <button type="button" className="pb-modal-secondary" onClick={onClose}>
+            Keep browsing
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -199,6 +356,7 @@ export default function VariantD() {
   const [selected, setSelected] = useState(["Beaches", "Food"]);
   const [points, setPoints] = useState(206000);
   const [fitsOnly, setFitsOnly] = useState(false);
+  const [openTrip, setOpenTrip] = useState<ScoredTrip | null>(null);
 
   const onToggle = (tag: string) =>
     setSelected((s) => (s.includes(tag) ? s.filter((x) => x !== tag) : [...s, tag]));
@@ -272,7 +430,7 @@ export default function VariantD() {
         ) : (
           <div className="pb-trip-grid">
             {list.map((s) => (
-              <PBTripCard key={s.d.id} s={s} selected={selected} />
+              <PBTripCard key={s.d.id} s={s} selected={selected} onOpen={setOpenTrip} />
             ))}
           </div>
         )}
@@ -280,6 +438,15 @@ export default function VariantD() {
 
       <PBHowDiscover />
       <PBFooter />
+
+      {openTrip && (
+        <PBDealModal
+          s={openTrip}
+          points={points}
+          selected={selected}
+          onClose={() => setOpenTrip(null)}
+        />
+      )}
     </div>
   );
 }
