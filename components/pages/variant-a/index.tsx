@@ -25,7 +25,7 @@ const TONE_VAR: Record<Tone, string> = {
 };
 
 // Locked-in default tweaks (the design's chosen direction).
-const DOT_COLOR = "#A7BBD4";
+const DOT_COLOR = "#C2AE9F";
 const FRAMING = 1; // 0 gentle · 1 balanced · 2 bold
 
 const ButlerMark = ({ size = 20 }: { size?: number }) => (

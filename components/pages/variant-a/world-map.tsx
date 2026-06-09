@@ -134,7 +134,7 @@ export function WorldMap({ destinations, selectedId, onSelect, dotColor, hidden 
         ctx.globalAlpha = 0.45 + 0.4 * edge;
         ctx.beginPath();
         ctx.arc(px, py, r, 0, Math.PI * 2);
-        ctx.fillStyle = dotColor || "#9DB2C9";
+        ctx.fillStyle = dotColor || "#C2AE9F";
         ctx.fill();
       }
     }

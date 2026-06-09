@@ -13,7 +13,7 @@ import "../variant-a/variant-a.css";
 import "../variant-b/variant-b.css";
 import "./variant-c.css";
 
-const DOT_COLOR = "#A7BBD4";
+const DOT_COLOR = "#C2AE9F";
 const DEFAULT_GOALS = ["tokyo", "maldives", "capetown"];
 
 /* ---------- Points engine (inputs + roll-up) ---------- */

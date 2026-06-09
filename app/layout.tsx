@@ -1,26 +1,27 @@
-import type { Metadata } from "next";
-import {
-  Bricolage_Grotesque,
-  Plus_Jakarta_Sans,
-  Space_Grotesk,
-} from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-head",
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-});
-
-const jakarta = Plus_Jakarta_Sans({
+// Warm, editorial single-typeface system (matches the points-guide vibe).
+// Inter is exposed under all three CSS variables the components consume.
+const jakarta = Inter({
   variable: "--font-body",
   subsets: ["latin"],
+  display: "swap",
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const spaceGrotesk = Space_Grotesk({
+const bricolage = Inter({
+  variable: "--font-head",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["600", "700", "800"],
+});
+
+const spaceGrotesk = Inter({
   variable: "--font-num",
   subsets: ["latin"],
+  display: "swap",
   weight: ["500", "600", "700"],
 });
 
@@ -28,6 +29,10 @@ export const metadata: Metadata = {
   title: "My Points Butler — Use now or save?",
   description:
     "Your personal miles concierge. Compare today's award cost against the cheapest window ahead — so you spend points on the right trip.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#F9EFE9",
 };
 
 export default function RootLayout({

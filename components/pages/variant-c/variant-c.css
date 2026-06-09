@@ -9,12 +9,12 @@
 .pb-range { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; margin: 12px 0 4px;
   background: linear-gradient(90deg, var(--brand), var(--brand-2)); cursor: pointer; }
 .pb-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%;
-  background: #fff; border: 3px solid var(--brand); box-shadow: 0 2px 8px rgba(18,32,54,.25); cursor: grab; }
-.pb-range::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--brand); box-shadow: 0 2px 8px rgba(18,32,54,.25); cursor: grab; }
+  background: #fff; border: 3px solid var(--brand); box-shadow: 0 2px 8px rgba(31,20,16,.25); cursor: grab; }
+.pb-range::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--brand); box-shadow: 0 2px 8px rgba(31,20,16,.25); cursor: grab; }
 .pb-range-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-weight: 600; }
 
 .pb-eng-roll { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); }
-.pb-eng-bar { height: 12px; background: #E7EEF6; border-radius: 999px; overflow: hidden; }
+.pb-eng-bar { height: 12px; background: #EEDFD3; border-radius: 999px; overflow: hidden; }
 .pb-eng-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--brand), var(--save)); transition: width .5s cubic-bezier(.2,.8,.2,1); }
 .pb-eng-stats { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-top: 10px; font-size: 13px; color: var(--muted); }
 .pb-eng-stats strong { font-family: var(--font-num); color: var(--ink); }
@@ -27,10 +27,10 @@
 
 .pb-goal { display: flex; background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: var(--shadow-md); }
 .pb-goal-rank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-  width: 64px; flex-shrink: 0; background: linear-gradient(180deg, #FAFCFF, #F1F6FC); border-right: 1px solid var(--line); }
+  width: 64px; flex-shrink: 0; background: linear-gradient(180deg, #FBF4EE, #FBF4EE); border-right: 1px solid var(--line); }
 .pb-goal-num { font-family: var(--font-num); font-weight: 700; font-size: 17px; color: var(--ink); }
 .pb-goal-arrow { width: 28px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 7px; cursor: pointer;
-  background: rgba(18,32,54,.06); color: var(--ink-soft); font-size: 11px; transition: background .15s; }
+  background: rgba(31,20,16,.06); color: var(--ink-soft); font-size: 11px; transition: background .15s; }
 .pb-goal-arrow:hover:not(:disabled) { background: color-mix(in srgb, var(--brand) 18%, #fff); color: var(--brand); }
 .pb-goal-arrow:disabled { opacity: .3; cursor: not-allowed; }
 
@@ -46,11 +46,11 @@
 .pb-goal-city { font-family: var(--font-head); font-weight: 700; font-size: 19px; color: var(--ink); }
 .pb-goal-vibe { font-size: 13.5px; color: var(--muted); margin-top: 1px; }
 .pb-goal-x { width: 28px; height: 28px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; border: 0; cursor: pointer;
-  background: rgba(18,32,54,.06); color: var(--ink-soft); font-size: 18px; line-height: 1; transition: background .15s; }
+  background: rgba(31,20,16,.06); color: var(--ink-soft); font-size: 18px; line-height: 1; transition: background .15s; }
 .pb-goal-x:hover { background: rgba(255,107,92,.16); color: var(--now-deep); }
 
 .pb-goal-progwrap { margin: 16px 0 0; }
-.pb-goal-prog { height: 12px; background: #E7EEF6; border-radius: 999px; overflow: hidden; }
+.pb-goal-prog { height: 12px; background: #EEDFD3; border-radius: 999px; overflow: hidden; }
 .pb-goal-prog-fill { height: 100%; border-radius: 999px; transition: width .5s cubic-bezier(.2,.8,.2,1); }
 .pb-goal-prog-fill.is-save { background: linear-gradient(90deg, var(--save), var(--save-deep)); }
 .pb-goal-prog-fill.is-wait { background: linear-gradient(90deg, var(--wait), var(--wait-deep)); }

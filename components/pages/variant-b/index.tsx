@@ -29,7 +29,7 @@ const TONE_VAR = {
   neutral: "var(--brand)",
 } as const;
 
-const DOT_COLOR = "#A7BBD4";
+const DOT_COLOR = "#C2AE9F";
 
 const DEFAULT_WALLET: WalletEntry[] = [
   { id: 1, type: "card", program: "Amex Membership Rewards", points: 120000 },

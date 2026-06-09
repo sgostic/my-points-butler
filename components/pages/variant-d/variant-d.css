@@ -35,7 +35,7 @@
 .pb-trip-top { position: relative; height: 132px; padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;
   background:
     radial-gradient(circle at 18% 22%, rgba(255,255,255,.35) 0 1.5px, transparent 2px) 0 0 / 16px 16px,
-    linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #1B3A6B));
+    linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #3A2A22));
   color: #fff; }
 .pb-trip-flag { position: absolute; top: 14px; left: 16px; font-size: 30px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
 .pb-trip-match { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 4px;
@@ -48,7 +48,7 @@
 .pb-trip-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
 .pb-trip-vibe { font-size: 14px; color: var(--ink-soft); line-height: 1.45; margin: 0; }
 .pb-trip-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
-.pb-ttag { font-size: 11.5px; font-weight: 700; color: var(--muted); background: #F1F5FA; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
+.pb-ttag { font-size: 11.5px; font-weight: 700; color: var(--muted); background: #FBF4EE; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
 .pb-ttag.is-match { color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, #fff); border-color: color-mix(in srgb, var(--brand) 28%, #fff); }
 .pb-trip-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line-soft); }
 .pb-trip-price-lbl { display: block; font-size: 11px; color: var(--muted); font-weight: 600; }
@@ -93,7 +93,7 @@
 .pb-modal-tnum span { font-size: 11px; color: var(--muted); font-weight: 600; }
 
 .pb-modal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0 0; }
-.pb-modal-stat { background: #F1F5FA; border: 1px solid var(--line); border-radius: 14px; padding: 12px; text-align: center; }
+.pb-modal-stat { background: #FBF4EE; border: 1px solid var(--line); border-radius: 14px; padding: 12px; text-align: center; }
 .pb-modal-stat-l { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
 .pb-modal-stat-n { font-family: var(--font-num); font-weight: 700; font-size: 17px; color: var(--ink); }
 .pb-modal-stat-n.is-save { color: var(--save-deep); }
@@ -107,7 +107,7 @@
   background: linear-gradient(135deg, var(--brand), var(--brand-2)); border: none; border-radius: 13px; padding: 14px; cursor: pointer;
   box-shadow: 0 6px 16px color-mix(in srgb, var(--brand) 30%, transparent); transition: filter .15s; }
 .pb-modal-book:hover { filter: brightness(1.05); }
-.pb-modal-book.is-locked { background: #E2E8F0; color: var(--muted); box-shadow: none; cursor: not-allowed; }
+.pb-modal-book.is-locked { background: #E6D6CB; color: var(--muted); box-shadow: none; cursor: not-allowed; }
 .pb-modal-secondary { font-family: var(--font-body); font-weight: 700; font-size: 14px; color: var(--ink-soft);
   background: #fff; border: 1.5px solid var(--line); border-radius: 13px; padding: 14px 18px; cursor: pointer; transition: all .15s; }
 .pb-modal-secondary:hover { border-color: var(--ink-soft); color: var(--ink); }
