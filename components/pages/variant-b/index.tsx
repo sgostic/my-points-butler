@@ -58,14 +58,6 @@ function PBNavModes({ balance }: { balance: number }) {
         </span>
         <span className="pb-brand-name">My Points Butler</span>
       </a>
-      <div className="pb-modeswitch" role="tablist" aria-label="Mode">
-        <a className="pb-mode" href="?variant=a" role="tab">
-          Use-now planner
-        </a>
-        <span className="pb-mode is-on" role="tab" aria-selected="true">
-          Deal alerts
-        </span>
-      </div>
       <div className="pb-nav-right">
         <div className="pb-balance" title="Your combined wallet">
           <span className="pb-balance-label">Wallet</span>

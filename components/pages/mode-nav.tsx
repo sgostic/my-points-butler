@@ -5,15 +5,7 @@ import { fmt } from "./variant-a/data";
 
 export type ModeId = "planner" | "alerts" | "goals" | "discover";
 
-const PB_MODES: { id: ModeId; label: string; href: string }[] = [
-  { id: "planner", label: "Use-now planner", href: "?variant=a" },
-  { id: "alerts", label: "Deal alerts", href: "?variant=b" },
-  { id: "goals", label: "Goals", href: "?variant=c" },
-  { id: "discover", label: "Discover", href: "?variant=d" },
-];
-
 export function PBModeNav({
-  active,
   balance,
   balanceLabel = "Wallet",
 }: {
@@ -36,19 +28,6 @@ export function PBModeNav({
         </span>
         <span className="pb-brand-name">My Points Butler</span>
       </a>
-      <div className="pb-modeswitch" role="tablist" aria-label="Mode">
-        {PB_MODES.map((m) =>
-          m.id === active ? (
-            <span key={m.id} className="pb-mode is-on" role="tab" aria-selected="true">
-              {m.label}
-            </span>
-          ) : (
-            <a key={m.id} className="pb-mode" href={m.href} role="tab">
-              {m.label}
-            </a>
-          ),
-        )}
-      </div>
       <div className="pb-nav-right">
         <div className="pb-balance" title="Your points">
           <span className="pb-balance-label">{balanceLabel}</span>
