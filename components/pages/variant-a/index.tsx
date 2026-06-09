@@ -482,7 +482,7 @@ export default function VariantA() {
 
   const onSelect = (id: string) => {
     setSelectedId(id);
-    if (typeof window !== "undefined" && window.innerWidth < 900) {
+    if (typeof window !== "undefined") {
       const el = document.getElementById("compare");
       if (el) window.scrollTo({ top: el.offsetTop - 12, behavior: "smooth" });
     }

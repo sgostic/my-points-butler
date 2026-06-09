@@ -1,0 +1,76 @@
+/* My Points Butler — Goals variant styles (loads after styles.css + styles-alerts.css). */
+
+/* ---------- Points engine ---------- */
+.pb-engine .pb-wallet-head { margin-bottom: 14px; }
+.pb-eng-fields { display: flex; gap: 18px; align-items: flex-start; }
+.pb-eng-fields .pb-field { flex: 1; }
+.pb-input-wide { width: 100%; font-family: var(--font-num); font-weight: 700; font-size: 18px; }
+.pb-eng-rate { font-family: var(--font-num); color: var(--brand); }
+.pb-range { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; margin: 12px 0 4px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2)); cursor: pointer; }
+.pb-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--brand); box-shadow: 0 2px 8px rgba(18,32,54,.25); cursor: grab; }
+.pb-range::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--brand); box-shadow: 0 2px 8px rgba(18,32,54,.25); cursor: grab; }
+.pb-range-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-weight: 600; }
+
+.pb-eng-roll { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); }
+.pb-eng-bar { height: 12px; background: #E7EEF6; border-radius: 999px; overflow: hidden; }
+.pb-eng-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--brand), var(--save)); transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.pb-eng-stats { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-top: 10px; font-size: 13px; color: var(--muted); }
+.pb-eng-stats strong { font-family: var(--font-num); color: var(--ink); }
+.pb-eng-eta { font-weight: 700; color: var(--save-deep); }
+
+/* ---------- Goals list ---------- */
+.pb-goals-list { display: flex; flex-direction: column; gap: 16px; }
+.pb-empty { padding: 50px; text-align: center; color: var(--muted); font-size: 16px; background: var(--card);
+  border: 1px dashed var(--line); border-radius: 20px; }
+
+.pb-goal { display: flex; background: var(--card); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: var(--shadow-md); }
+.pb-goal-rank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  width: 64px; flex-shrink: 0; background: linear-gradient(180deg, #FAFCFF, #F1F6FC); border-right: 1px solid var(--line); }
+.pb-goal-num { font-family: var(--font-num); font-weight: 700; font-size: 17px; color: var(--ink); }
+.pb-goal-arrow { width: 28px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 7px; cursor: pointer;
+  background: rgba(18,32,54,.06); color: var(--ink-soft); font-size: 11px; transition: background .15s; }
+.pb-goal-arrow:hover:not(:disabled) { background: color-mix(in srgb, var(--brand) 18%, #fff); color: var(--brand); }
+.pb-goal-arrow:disabled { opacity: .3; cursor: not-allowed; }
+
+.pb-goal-body { flex: 1; min-width: 0; padding: 20px 24px; position: relative; }
+.pb-goal-body::before { content: ""; position: absolute; left: 0; top: 16px; bottom: 16px; width: 4px; border-radius: 0 4px 4px 0; }
+.pb-goal.tone-save .pb-goal-body::before { background: linear-gradient(var(--save), var(--save-deep)); }
+.pb-goal.tone-wait .pb-goal-body::before { background: linear-gradient(var(--wait), var(--wait-deep)); }
+.pb-goal.tone-now .pb-goal-body::before { background: linear-gradient(var(--now), var(--now-deep)); }
+
+.pb-goal-head { display: flex; align-items: center; gap: 12px; }
+.pb-goal-flag { font-size: 30px; line-height: 1; }
+.pb-goal-titles { flex: 1; min-width: 0; }
+.pb-goal-city { font-family: var(--font-head); font-weight: 700; font-size: 19px; color: var(--ink); }
+.pb-goal-vibe { font-size: 13.5px; color: var(--muted); margin-top: 1px; }
+.pb-goal-x { width: 28px; height: 28px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(18,32,54,.06); color: var(--ink-soft); font-size: 18px; line-height: 1; transition: background .15s; }
+.pb-goal-x:hover { background: rgba(255,107,92,.16); color: var(--now-deep); }
+
+.pb-goal-progwrap { margin: 16px 0 0; }
+.pb-goal-prog { height: 12px; background: #E7EEF6; border-radius: 999px; overflow: hidden; }
+.pb-goal-prog-fill { height: 100%; border-radius: 999px; transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.pb-goal-prog-fill.is-save { background: linear-gradient(90deg, var(--save), var(--save-deep)); }
+.pb-goal-prog-fill.is-wait { background: linear-gradient(90deg, var(--wait), var(--wait-deep)); }
+.pb-goal-prog-fill.is-now { background: linear-gradient(90deg, var(--brand), var(--brand-2)); }
+.pb-goal-nums { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; font-size: 13.5px; color: var(--muted); }
+.pb-goal-have strong { font-family: var(--font-num); font-weight: 700; font-size: 16px; color: var(--ink); }
+.pb-goal-target { flex: 1; }
+.pb-goal-pct { font-family: var(--font-num); font-weight: 700; font-size: 16px; color: var(--ink); }
+
+.pb-goal-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; margin-top: 16px; }
+.pb-goal-rec { font-size: 14px; color: var(--ink-soft); font-weight: 600; }
+.pb-goal-boost { width: 100%; font-size: 13px; color: var(--wait-deep); background: color-mix(in srgb, var(--wait) 10%, #fff);
+  border: 1px solid color-mix(in srgb, var(--wait) 26%, #fff); border-radius: 10px; padding: 8px 12px; }
+
+/* extra badge tone for "earn" */
+.pb-mbadge.is-now { background: color-mix(in srgb, var(--now) 16%, #fff); color: var(--now-deep); border: 1px solid color-mix(in srgb, var(--now) 38%, #fff); }
+
+@media (max-width: 760px) {
+  .pb-eng-fields { flex-direction: column; gap: 14px; }
+  .pb-goal-rank { width: 48px; }
+  .pb-goal-body { padding: 16px; }
+  .pb-goal-foot { gap: 8px; }
+}

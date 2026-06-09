@@ -25,6 +25,10 @@ export interface Destination {
   accent: string;
   flights: Offer[];
   hotels: Offer[];
+  /* Discovery metadata (used by the Goals + Discover variants). */
+  tags: string[];
+  nights: number;
+  vibe: string;
 }
 
 export interface Verdict {
@@ -45,7 +49,7 @@ export interface Summary {
 }
 
 // lat/lon used to project pins onto the equirectangular dotted map.
-export const DESTINATIONS: Destination[] = [
+const BASE_DESTINATIONS: Omit<Destination, "tags" | "nights" | "vibe">[] = [
   {
     id: "tokyo",
     city: "Tokyo",
@@ -458,3 +462,66 @@ export function summarize(dest: Destination): Summary {
 }
 
 export const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
+
+// ---- Augment destinations with discovery tags, typical trip length + vibe ----
+const TAGS: Record<string, string[]> = {
+  tokyo: ["Cities", "Food", "Culture", "Nightlife"],
+  bali: ["Beaches", "Nature", "Wellness"],
+  paris: ["Cities", "Culture", "Food"],
+  nyc: ["Cities", "Food", "Nightlife"],
+  maldives: ["Beaches", "Wellness"],
+  lisbon: ["Cities", "Food", "Beaches"],
+  capetown: ["Nature", "Adventure", "Food"],
+  reykjavik: ["Nature", "Adventure"],
+  losangeles: ["Cities", "Beaches", "Nightlife"],
+  london: ["Cities", "Culture", "Food"],
+  rio: ["Beaches", "Nightlife", "Nature"],
+  buenosaires: ["Cities", "Food", "Culture"],
+  beijing: ["Culture", "Cities", "Food"],
+  berlin: ["Cities", "Nightlife", "Culture"],
+  miami: ["Beaches", "Nightlife", "Food"],
+  vancouver: ["Nature", "Cities", "Adventure"],
+  toronto: ["Cities", "Food", "Culture"],
+  melbourne: ["Cities", "Food", "Culture"],
+};
+const NIGHTS: Record<string, number> = {
+  tokyo: 4, bali: 6, paris: 4, nyc: 3, maldives: 5, lisbon: 4, capetown: 5, reykjavik: 4,
+  losangeles: 4, london: 4, rio: 5, buenosaires: 4, beijing: 4, berlin: 4, miami: 3,
+  vancouver: 4, toronto: 3, melbourne: 5,
+};
+const VIBES: Record<string, string> = {
+  tokyo: "Neon nights, Michelin counters, cherry blossom calm.",
+  bali: "Jungle villas, surf breaks, slow mornings.",
+  paris: "Café culture, galleries, golden-hour boulevards.",
+  nyc: "Skyline energy, food halls, late-night everything.",
+  maldives: "Overwater villas and impossible blues.",
+  lisbon: "Tiled hills, seafood, Atlantic light.",
+  capetown: "Table Mountain, wine country, wild coast.",
+  reykjavik: "Northern lights, lagoons, lunar landscapes.",
+  losangeles: "Palm-lined boulevards, beach towns, canyon hikes.",
+  london: "Royal pomp, world theatre, endless markets.",
+  rio: "Copacabana sun, samba nights, jungle peaks.",
+  buenosaires: "Tango halls, steak houses, faded grandeur.",
+  beijing: "Imperial palaces, hutong alleys, the Great Wall.",
+  berlin: "Techno cellars, gallery sprawl, currywurst dawns.",
+  miami: "Art-deco sands, Latin rhythm, neon nights.",
+  vancouver: "Mountains meet ocean meet glass towers.",
+  toronto: "Lakefront skyline and a hundred cuisines.",
+  melbourne: "Laneway coffee, street art, brunch obsession.",
+};
+
+export const DESTINATIONS: Destination[] = BASE_DESTINATIONS.map((d) => ({
+  ...d,
+  tags: TAGS[d.id] ?? [],
+  nights: NIGHTS[d.id] ?? 4,
+  vibe: VIBES[d.id] ?? "",
+}));
+
+export const INTERESTS = ["Beaches", "Cities", "Culture", "Food", "Nature", "Adventure", "Wellness", "Nightlife"];
+
+const cheapest = (arr: Offer[], field: "now" | "later") => Math.min(...arr.map((o) => o[field]));
+
+// Representative trip cost: cheapest flight + cheapest hotel × nights.
+export function tripCost(dest: Destination, when: "now" | "later", nights?: number) {
+  return cheapest(dest.flights, when) + cheapest(dest.hotels, when) * (nights || dest.nights || 4);
+}

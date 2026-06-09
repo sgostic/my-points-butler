@@ -1,0 +1,63 @@
+/* My Points Butler — Discover variant styles (after the base + alerts styles). */
+
+/* Shared helpers (defined alongside the Goals styles in the original bundle). */
+.pb-input-wide { width: 100%; font-family: var(--font-num); font-weight: 700; font-size: 18px; }
+.pb-empty { padding: 50px; text-align: center; color: var(--muted); font-size: 16px; background: var(--card);
+  border: 1px dashed var(--line); border-radius: 20px; }
+
+.pb-hero-discover .pb-hero-single { max-width: 880px; margin: 0 auto; }
+.pb-taste .pb-wallet-head { margin-bottom: 14px; }
+.pb-taste-chips { display: flex; flex-wrap: wrap; gap: 9px; }
+.pb-tchip { font-family: var(--font-body); font-weight: 700; font-size: 14px; color: var(--ink-soft);
+  background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 9px 16px; cursor: pointer;
+  transition: all .14s; }
+.pb-tchip:hover { border-color: color-mix(in srgb, var(--brand) 40%, #fff); color: var(--brand); }
+.pb-tchip.is-on { background: linear-gradient(135deg, var(--brand), var(--brand-2)); border-color: transparent; color: #fff;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 36%, transparent); }
+
+.pb-taste-foot { display: flex; align-items: flex-end; gap: 16px; margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); flex-wrap: wrap; }
+.pb-taste-foot .pb-field { width: 180px; }
+.pb-fits { display: inline-flex; align-items: center; gap: 9px; font-family: var(--font-body); font-weight: 700; font-size: 14px;
+  color: var(--ink-soft); background: #fff; border: 1.5px solid var(--line); border-radius: 12px; padding: 11px 16px; cursor: pointer; transition: all .15s; }
+.pb-fits-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); transition: all .15s; }
+.pb-fits.is-on { border-color: color-mix(in srgb, var(--save) 40%, #fff); color: var(--save-deep); background: color-mix(in srgb, var(--save) 9%, #fff); }
+.pb-fits.is-on .pb-fits-dot { background: var(--save); border-color: var(--save); box-shadow: inset 0 0 0 2px #fff; }
+.pb-taste-count { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--muted); }
+
+/* ---------- Trip grid ---------- */
+.pb-trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
+.pb-trip { background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
+  box-shadow: var(--shadow-sm); display: flex; flex-direction: column; transition: transform .18s ease, box-shadow .18s ease; }
+.pb-trip:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.pb-trip-top { position: relative; height: 132px; padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.35) 0 1.5px, transparent 2px) 0 0 / 16px 16px,
+    linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #1B3A6B));
+  color: #fff; }
+.pb-trip-flag { position: absolute; top: 14px; left: 16px; font-size: 30px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
+.pb-trip-match { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 700; color: var(--ink); background: rgba(255,255,255,.92); padding: 5px 10px; border-radius: 999px; backdrop-filter: blur(4px); }
+.pb-trip-match-n { font-family: var(--font-num); font-weight: 700; color: var(--brand); }
+.pb-trip-loc { line-height: 1.05; }
+.pb-trip-city { display: block; font-family: var(--font-head); font-weight: 700; font-size: 26px; text-shadow: 0 2px 10px rgba(0,0,0,.25); }
+.pb-trip-country { font-size: 13px; font-weight: 600; opacity: .92; }
+
+.pb-trip-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
+.pb-trip-vibe { font-size: 14px; color: var(--ink-soft); line-height: 1.45; margin: 0; }
+.pb-trip-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
+.pb-ttag { font-size: 11.5px; font-weight: 700; color: var(--muted); background: #F1F5FA; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; }
+.pb-ttag.is-match { color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, #fff); border-color: color-mix(in srgb, var(--brand) 28%, #fff); }
+.pb-trip-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+.pb-trip-price-lbl { display: block; font-size: 11px; color: var(--muted); font-weight: 600; }
+.pb-trip-price-n { font-family: var(--font-num); font-weight: 700; font-size: 20px; color: var(--ink); }
+.pb-trip-price-n span { font-size: 12px; color: var(--muted); font-weight: 600; }
+.pb-trip-cta { margin-top: 14px; font-family: var(--font-body); font-weight: 700; font-size: 14.5px; color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 10%, #fff); border: 1px solid color-mix(in srgb, var(--brand) 26%, #fff);
+  border-radius: 12px; padding: 12px; cursor: pointer; transition: all .15s; }
+.pb-trip-cta:hover { background: color-mix(in srgb, var(--brand) 18%, #fff); }
+
+@media (max-width: 760px) {
+  .pb-taste-foot .pb-field { width: 100%; }
+  .pb-fits { width: 100%; justify-content: center; }
+  .pb-taste-count { margin: 0 auto; }
+}
