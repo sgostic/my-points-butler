@@ -137,11 +137,15 @@ function PBVerdict({
   summary,
   framing,
   balance,
+  isSignedIn,
+  onSignUp,
 }: {
   dest: Destination;
   summary: Summary;
   framing: number;
   balance: number;
+  isSignedIn: boolean;
+  onSignUp: () => void;
 }) {
   const [feedback, setFeedback] = useState(false);
   const best = summary.best;
@@ -183,6 +187,13 @@ function PBVerdict({
       : "miles you'd keep by waiting";
   const badgeLabel = tone === "now" ? "Book now" : tone === "neutral" ? "Roughly even" : "Wait & save";
   const arrow = tone === "now" ? "↑" : "↓";
+  const ctaLabel = !isSignedIn
+    ? "Sign up to save this verdict →"
+    : tone === "now"
+    ? `Book ${best.o.name} now →`
+    : tone === "neutral"
+    ? `Use my points on ${dest.city} →`
+    : `Remind me to book ${dest.city} →`;
 
   return (
     <div className={"pb-verdict-card tone-" + tone} style={{ "--accent": dest.accent } as React.CSSProperties}>
@@ -236,12 +247,12 @@ function PBVerdict({
             You save <strong>{fmt(save)} miles</strong> · {pct}% off by waiting
           </div>
         )}
-        <button type="button" className="pb-vc-cta" onClick={() => setFeedback(true)}>
-          {tone === "now"
-            ? `Book ${best.o.name} now →`
-            : tone === "neutral"
-            ? `Use my points on ${dest.city} →`
-            : `Remind me to book ${dest.city} →`}
+        <button
+          type="button"
+          className={"pb-vc-cta" + (isSignedIn ? "" : " pb-gated-action")}
+          onClick={() => (isSignedIn ? setFeedback(true) : onSignUp())}
+        >
+          {ctaLabel}
         </button>
       </div>
       {feedback && (
@@ -319,7 +330,41 @@ function PBRow({ offer, balance }: { offer: Offer; balance: number }) {
   );
 }
 
-function PBTable({ dest, balance }: { dest: Destination; balance: number }) {
+function PBLockedOfferRow({
+  offer,
+  balance,
+  onSignUp,
+}: {
+  offer: Offer;
+  balance: number;
+  onSignUp: () => void;
+}) {
+  return (
+    <div className="pb-row-lock">
+      <div className="pb-row-lock-preview" aria-hidden="true">
+        <PBRow offer={offer} balance={balance} />
+      </div>
+      <div className="pb-row-lock-cta">
+        <span>Unlock this option and every forecast</span>
+        <button type="button" onClick={onSignUp}>
+          Sign up
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PBTable({
+  dest,
+  balance,
+  isSignedIn,
+  onSignUp,
+}: {
+  dest: Destination;
+  balance: number;
+  isSignedIn: boolean;
+  onSignUp: () => void;
+}) {
   const [tab, setTab] = useState<"flights" | "hotels">("flights");
   const rows = tab === "flights" ? dest.flights : dest.hotels;
   return (
@@ -360,7 +405,11 @@ function PBTable({ dest, balance }: { dest: Destination; balance: number }) {
           <div className="pb-cell pb-cell-verdict">Verdict</div>
         </div>
         {rows.map((o, i) => (
-          <PBRow key={i} offer={o} balance={balance} />
+          isSignedIn || i === 0 ? (
+            <PBRow key={i} offer={o} balance={balance} />
+          ) : (
+            <PBLockedOfferRow key={i} offer={o} balance={balance} onSignUp={onSignUp} />
+          )
         ))}
       </div>
     </div>
@@ -511,6 +560,8 @@ export default function VariantA() {
   const [balance, setBalance] = useState(186400);
   const dest = DESTINATIONS.find((d) => d.id === selectedId) ?? DESTINATIONS[0];
   const summary = summarize(dest);
+  const isSignedIn = Boolean(auth.userEmail);
+  const openSignUp = () => auth.openAuthModal("sign-up");
 
   const onSelect = (id: string) => {
     setSelectedId(id);
@@ -536,8 +587,15 @@ export default function VariantA() {
           <h2 className="pb-h2">Should you use points for {dest.city} — or save them?</h2>
           <p className="pb-compare-lede">{dest.blurb}</p>
         </div>
-        <PBVerdict dest={dest} summary={summary} framing={FRAMING} balance={balance} />
-        <PBTable dest={dest} balance={balance} />
+        <PBVerdict
+          dest={dest}
+          summary={summary}
+          framing={FRAMING}
+          balance={balance}
+          isSignedIn={isSignedIn}
+          onSignUp={openSignUp}
+        />
+        <PBTable dest={dest} balance={balance} isSignedIn={isSignedIn} onSignUp={openSignUp} />
       </section>
       <PBHow />
       <PBFooter />

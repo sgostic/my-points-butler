@@ -15,7 +15,7 @@ import {
   type Destination,
 } from "../variant-a/data";
 import { PBModeNav } from "../mode-nav";
-import { AuthModal, useAuth } from "../auth";
+import { AuthModal, PBSignupGate, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
 import "../variant-a/variant-a.css";
 import "../variant-b/variant-b.css";
@@ -185,11 +185,15 @@ function PBDealModal({
   points,
   selected,
   onClose,
+  isSignedIn,
+  onSignUp,
 }: {
   s: ScoredTrip;
   points: number;
   selected: string[];
   onClose: () => void;
+  isSignedIn: boolean;
+  onSignUp: () => void;
 }) {
   const { d, pct, cost, affordable, gap } = s;
   const sum = summarize(d);
@@ -300,8 +304,16 @@ function PBDealModal({
 
         <div className="pb-modal-foot">
           {affordable ? (
-            <button type="button" className="pb-modal-book" onClick={() => setFeedback(true)}>
-              Book with {fmt(cost)} pts →
+            <button
+              type="button"
+              className="pb-modal-book"
+              onClick={() => (isSignedIn ? setFeedback(true) : onSignUp())}
+            >
+              {isSignedIn ? `Book with ${fmt(cost)} pts →` : "Sign up to save this deal →"}
+            </button>
+          ) : !isSignedIn ? (
+            <button type="button" className="pb-modal-book" onClick={onSignUp}>
+              Sign up to track this gap →
             </button>
           ) : (
             <button type="button" className="pb-modal-book is-locked" disabled>
@@ -345,6 +357,70 @@ function PBHowDiscover() {
   );
 }
 
+function PBDiscoverAdvancedInsights({
+  list,
+  points,
+  selected,
+  isSignedIn,
+  onSignUp,
+}: {
+  list: ScoredTrip[];
+  points: number;
+  selected: string[];
+  isSignedIn: boolean;
+  onSignUp: () => void;
+}) {
+  const best = list[0];
+  const closest = list
+    .filter((s) => !s.affordable)
+    .sort((a, b) => a.gap - b.gap)[0];
+  const content = (
+    <div className="pb-discover-advanced">
+      <div className="pb-discover-advanced-head">
+        <div>
+          <span className="pb-eyebrow dark">Advanced discovery</span>
+          <h3>Track the trips that fit your taste and points.</h3>
+        </div>
+        <span className="pb-advanced-pill">{isSignedIn ? "Tracking ready" : "Account unlock"}</span>
+      </div>
+      <div className="pb-discover-advanced-grid">
+        <div className="pb-advanced-item">
+          <span className="pb-advanced-label">Best saved match</span>
+          <strong>{best ? `${best.d.city} from ${fmt(best.cost)} pts` : "No matching trips yet"}</strong>
+          <p>
+            {selected.length
+              ? `Matched to ${selected.slice(0, 3).join(", ")}.`
+              : "Pick a few interests to build a saved trip shortlist."}
+          </p>
+        </div>
+        <div className="pb-advanced-item">
+          <span className="pb-advanced-label">Closest gap</span>
+          <strong>{closest ? `${fmt(closest.gap)} pts to ${closest.d.city}` : "Everything shown fits"}</strong>
+          <p>Track gaps and get nudged when your balance or a forecast makes a trip bookable.</p>
+        </div>
+        <div className="pb-advanced-item">
+          <span className="pb-advanced-label">Price alerts</span>
+          <strong>{fmt(points)} pts watched</strong>
+          <p>Save your point budget once and we&apos;ll monitor price drops across your matched trips.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <PBSignupGate
+      isSignedIn={isSignedIn}
+      onSignUp={onSignUp}
+      title="Sign up to unlock advanced discovery"
+      body="Save your taste profile, track gaps, and get alerts when matched trips move into range."
+      ctaLabel="Sign up for tracking"
+      className="pb-gate-advanced"
+    >
+      {content}
+    </PBSignupGate>
+  );
+}
+
 function PBFooter() {
   return (
     <footer className="pb-footer">
@@ -377,6 +453,8 @@ export default function VariantD() {
   const [points, setPoints] = useState(206000);
   const [fitsOnly, setFitsOnly] = useState(false);
   const [openTrip, setOpenTrip] = useState<ScoredTrip | null>(null);
+  const isSignedIn = Boolean(auth.userEmail);
+  const openSignUp = () => auth.openAuthModal("sign-up");
 
   const onToggle = (tag: string) =>
     setSelected((s) => (s.includes(tag) ? s.filter((x) => x !== tag) : [...s, tag]));
@@ -462,6 +540,13 @@ export default function VariantD() {
             ))}
           </div>
         )}
+        <PBDiscoverAdvancedInsights
+          list={list}
+          points={points}
+          selected={selected}
+          isSignedIn={isSignedIn}
+          onSignUp={openSignUp}
+        />
       </section>
 
       <PBHowDiscover />
@@ -473,6 +558,8 @@ export default function VariantD() {
           points={points}
           selected={selected}
           onClose={() => setOpenTrip(null)}
+          isSignedIn={isSignedIn}
+          onSignUp={openSignUp}
         />
       )}
       {auth.isAuthOpen ? <AuthModal {...auth} /> : null}

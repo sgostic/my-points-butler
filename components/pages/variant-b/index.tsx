@@ -355,7 +355,19 @@ function PBMatchSummary({ dest, ws }: { dest: Destination; ws: WalletSummary }) 
   );
 }
 
-function PBAlertCTA({ dest, pools, ws }: { dest: Destination; pools: Pools; ws: WalletSummary }) {
+function PBAlertCTA({
+  dest,
+  pools,
+  ws,
+  isSignedIn,
+  onSignUp,
+}: {
+  dest: Destination;
+  pools: Pools;
+  ws: WalletSummary;
+  isSignedIn: boolean;
+  onSignUp: () => void;
+}) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [feedback, setFeedback] = useState(false);
@@ -371,7 +383,24 @@ function PBAlertCTA({ dest, pools, ws }: { dest: Destination; pools: Pools; ws: 
 
   return (
     <div className="pb-al">
-      {!sent ? (
+      {!isSignedIn ? (
+        <>
+          <div className="pb-al-badge">🔒 Account alert</div>
+          <h3 className="pb-al-title">Sign up to watch {dest.city} against your wallet.</h3>
+          <p className="pb-al-copy">
+            We&apos;ll keep this match list tied to your balances and notify you when one of{" "}
+            <strong>{watching}</strong> watched award{watching === 1 ? "" : "s"} drops into range.
+          </p>
+          <button type="button" className="pb-al-btn pb-al-btn-full" onClick={onSignUp}>
+            Sign up to create alert
+          </button>
+          <div className="pb-al-meta">
+            <span className="pb-al-trigger">
+              Unlocks: <strong>saved wallet, alerts, and watched trips</strong>
+            </span>
+          </div>
+        </>
+      ) : !sent ? (
         <>
           <div className="pb-al-badge">🔔 Deal alert</div>
           <h3 className="pb-al-title">Ping me when a {dest.city} deal fits my wallet.</h3>
@@ -425,7 +454,19 @@ function PBAlertCTA({ dest, pools, ws }: { dest: Destination; pools: Pools; ws: 
   );
 }
 
-function PBMatchCard({ dest, pools, ws }: { dest: Destination; pools: Pools; ws: WalletSummary }) {
+function PBMatchCard({
+  dest,
+  pools,
+  ws,
+  isSignedIn,
+  onSignUp,
+}: {
+  dest: Destination;
+  pools: Pools;
+  ws: WalletSummary;
+  isSignedIn: boolean;
+  onSignUp: () => void;
+}) {
   return (
     <div
       className={
@@ -436,7 +477,7 @@ function PBMatchCard({ dest, pools, ws }: { dest: Destination; pools: Pools; ws:
     >
       <PBMatchSummary dest={dest} ws={ws} />
       <div className="pb-vc-right pb-al-wrap">
-        <PBAlertCTA dest={dest} pools={pools} ws={ws} />
+        <PBAlertCTA dest={dest} pools={pools} ws={ws} isSignedIn={isSignedIn} onSignUp={onSignUp} />
       </div>
     </div>
   );
@@ -496,7 +537,41 @@ function PBMatchRow({ offer, pool }: { offer: Destination["flights"][number]; po
   );
 }
 
-function PBMatchTable({ dest, pools }: { dest: Destination; pools: Pools }) {
+function PBLockedMatchRow({
+  offer,
+  pool,
+  onSignUp,
+}: {
+  offer: Destination["flights"][number];
+  pool: number;
+  onSignUp: () => void;
+}) {
+  return (
+    <div className="pb-row-lock">
+      <div className="pb-row-lock-preview" aria-hidden="true">
+        <PBMatchRow offer={offer} pool={pool} />
+      </div>
+      <div className="pb-row-lock-cta">
+        <span>Unlock all wallet matches for this tab</span>
+        <button type="button" onClick={onSignUp}>
+          Sign up
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PBMatchTable({
+  dest,
+  pools,
+  isSignedIn,
+  onSignUp,
+}: {
+  dest: Destination;
+  pools: Pools;
+  isSignedIn: boolean;
+  onSignUp: () => void;
+}) {
   const [tab, setTab] = useState<"flights" | "hotels">("flights");
   const rows = tab === "flights" ? dest.flights : dest.hotels;
   const pool = pbPoolForTab(pools, tab);
@@ -538,7 +613,11 @@ function PBMatchTable({ dest, pools }: { dest: Destination; pools: Pools }) {
           <div className="pb-cell pb-cell-verdict">Status</div>
         </div>
         {rows.map((o, i) => (
-          <PBMatchRow key={i} offer={o} pool={pool} />
+          isSignedIn || i === 0 ? (
+            <PBMatchRow key={i} offer={o} pool={pool} />
+          ) : (
+            <PBLockedMatchRow key={i} offer={o} pool={pool} onSignUp={onSignUp} />
+          )
         ))}
       </div>
     </div>
@@ -596,6 +675,8 @@ export default function VariantB() {
   const dest = DESTINATIONS.find((d) => d.id === selectedId) ?? DESTINATIONS[0];
   const pools = pbPools(wallet);
   const ws = pbWalletSummary(dest, pools);
+  const isSignedIn = Boolean(auth.userEmail);
+  const openSignUp = () => auth.openAuthModal("sign-up");
 
   const onSelect = (id: string) => {
     setSelectedId(id);
@@ -629,8 +710,8 @@ export default function VariantB() {
           <h2 className="pb-h2">What your points actually unlock in {dest.city}.</h2>
           <p className="pb-compare-lede">{dest.blurb}</p>
         </div>
-        <PBMatchCard dest={dest} pools={pools} ws={ws} />
-        <PBMatchTable dest={dest} pools={pools} />
+        <PBMatchCard dest={dest} pools={pools} ws={ws} isSignedIn={isSignedIn} onSignUp={openSignUp} />
+        <PBMatchTable dest={dest} pools={pools} isSignedIn={isSignedIn} onSignUp={openSignUp} />
       </section>
       <PBHowAlerts />
       <PBFooter />

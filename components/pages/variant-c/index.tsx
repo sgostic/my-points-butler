@@ -8,7 +8,7 @@ import { useState } from "react";
 import { DESTINATIONS, fmt } from "../variant-a/data";
 import { WorldMap } from "../variant-a/world-map";
 import { PBModeNav } from "../mode-nav";
-import { AuthModal, useAuth } from "../auth";
+import { AuthModal, PBSignupGate, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
 import { pbEta, pbPlanGoals, type GoalPlan } from "./goals";
 import "../variant-a/variant-a.css";
@@ -164,7 +164,12 @@ function PBGoalCard({
             </div>
             <div className="pb-goal-vibe">{dest.vibe}</div>
           </div>
-          <button type="button" className="pb-goal-x" aria-label="Remove goal" onClick={() => onRemove(plan.id)}>
+          <button
+            type="button"
+            className="pb-goal-x"
+            aria-label="Remove goal"
+            onClick={() => onRemove(plan.id)}
+          >
             ×
           </button>
         </div>
@@ -198,7 +203,11 @@ function PBGoalCard({
             </span>
           )}
           {plan.status === "use" && (
-            <button type="button" className="pb-goal-book" onClick={() => setFeedback(true)}>
+            <button
+              type="button"
+              className="pb-goal-book"
+              onClick={() => setFeedback(true)}
+            >
               Book {dest.city} now →
             </button>
           )}
@@ -283,6 +292,68 @@ function PBHeroGoals({
   );
 }
 
+function PBGoalAdvancedInsights({
+  plans,
+  spend,
+  isSignedIn,
+  onSignUp,
+}: {
+  plans: GoalPlan[];
+  spend: number;
+  isSignedIn: boolean;
+  onSignUp: () => void;
+}) {
+  const monthly = earnFromSpend(spend);
+  const nextReady = plans.find((p) => p.gap > 0);
+  const biggestGap = plans.reduce<GoalPlan | null>(
+    (best, plan) => (!best || plan.gap > best.gap ? plan : best),
+    null,
+  );
+  const bonusTrip = biggestGap ? pbEta(Math.max(0, biggestGap.months - 4)) : "today";
+
+  const content = (
+    <div className="pb-advanced">
+      <div className="pb-advanced-head">
+        <div>
+          <span className="pb-eyebrow dark">Advanced insights</span>
+          <h3>Optimize the order, earn path, and alerts.</h3>
+        </div>
+        <span className="pb-advanced-pill">{isSignedIn ? "Live plan" : "Account unlock"}</span>
+      </div>
+      <div className="pb-advanced-grid">
+        <div className="pb-advanced-item">
+          <span className="pb-advanced-label">Next unlock</span>
+          <strong>{nextReady ? `${nextReady.dest.city} by ${nextReady.eta}` : "Every goal is bookable"}</strong>
+          <p>{monthly ? `At +${fmt(monthly)} pts/month, this is the next trip to watch.` : "Add monthly spend to forecast unlock timing."}</p>
+        </div>
+        <div className="pb-advanced-item">
+          <span className="pb-advanced-label">Fastest boost</span>
+          <strong>{biggestGap ? `${biggestGap.dest.city} by ${bonusTrip}` : "No boost needed"}</strong>
+          <p>A targeted card bonus can compress the biggest gap by roughly four months.</p>
+        </div>
+        <div className="pb-advanced-item">
+          <span className="pb-advanced-label">Saved alerts</span>
+          <strong>{plans.length} tracked trip{plans.length === 1 ? "" : "s"}</strong>
+          <p>Get pinged when forecast windows move or a goal becomes bookable.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <PBSignupGate
+      isSignedIn={isSignedIn}
+      onSignUp={onSignUp}
+      title="Sign up to unlock advanced goal insights"
+      body="Save this plan, track moving ETAs, and see the fastest path to each trip."
+      ctaLabel="Sign up for insights"
+      className="pb-gate-advanced"
+    >
+      {content}
+    </PBSignupGate>
+  );
+}
+
 function PBHowGoals() {
   const steps = [
     { n: "1", t: "Pin your dreams", d: "Tap the trips you're chasing. We price each one at its cheapest forecast window." },
@@ -338,6 +409,8 @@ export default function VariantC() {
   const [goalIds, setGoalIds] = useState(DEFAULT_GOALS);
   const [current, setCurrent] = useState(206000);
   const [spend, setSpend] = useState(12000);
+  const isSignedIn = Boolean(auth.userEmail);
+  const openSignUp = () => auth.openAuthModal("sign-up");
 
   const goals = goalIds
     .map((id) => ({ id, dest: DESTINATIONS.find((d) => d.id === id) }))
@@ -413,6 +486,7 @@ export default function VariantC() {
             ))}
           </div>
         )}
+        <PBGoalAdvancedInsights plans={plans} spend={spend} isSignedIn={isSignedIn} onSignUp={openSignUp} />
       </section>
       <PBHowGoals />
       <PBFooter />

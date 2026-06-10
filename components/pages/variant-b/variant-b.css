@@ -104,6 +104,12 @@
   box-shadow: 0 6px 18px color-mix(in srgb, var(--brand) 40%, transparent); transition: transform .12s, box-shadow .2s, opacity .2s; }
 .pb-al-btn:hover { transform: translateY(-1px); }
 .pb-al-btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; transform: none; }
+.pb-al-btn-full {
+  align-self: flex-start;
+  margin-top: 18px;
+  min-height: 46px;
+  padding: 12px 22px;
+}
 .pb-al-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-top: 14px; font-size: 12.5px; color: var(--muted); }
 .pb-al-trigger strong { color: var(--ink-soft); }
 .pb-al-watch { font-weight: 600; color: var(--brand); }

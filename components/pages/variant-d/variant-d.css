@@ -65,6 +65,71 @@
   border-radius: 12px; padding: 12px; cursor: pointer; transition: all .15s; }
 .pb-trip-cta:hover { background: color-mix(in srgb, var(--brand) 18%, #fff); }
 
+.pb-discover-advanced {
+  margin-top: 22px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+}
+.pb-discover-advanced-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.pb-discover-advanced-head h3 {
+  color: var(--ink);
+  font-size: 26px;
+  line-height: 1.05;
+  margin-top: 8px;
+}
+.pb-discover-advanced-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.pb-advanced-pill {
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--brand) 24%, #fff);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 10%, #fff);
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 7px 11px;
+}
+.pb-advanced-item {
+  background: #FBF4EE;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  padding: 16px;
+}
+.pb-advanced-label {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.pb-advanced-item strong {
+  display: block;
+  color: var(--ink);
+  font-family: var(--font-head);
+  font-size: 19px;
+  line-height: 1.1;
+}
+.pb-advanced-item p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 8px 0 0;
+}
+
 /* ---------- Deal modal ---------- */
 .pb-modal-overlay { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
   padding: 20px; background: rgba(13, 31, 58, .55); backdrop-filter: blur(4px); animation: pb-fade .16s ease; }
@@ -122,6 +187,8 @@
   .pb-taste-foot .pb-field { width: 100%; }
   .pb-fits { width: 100%; justify-content: center; }
   .pb-taste-count { margin: 0 auto; }
+  .pb-discover-advanced-head { flex-direction: column; }
+  .pb-discover-advanced-grid { grid-template-columns: 1fr; }
   .pb-modal-grid { grid-template-columns: 1fr; }
   .pb-modal-foot { flex-direction: column; }
 }

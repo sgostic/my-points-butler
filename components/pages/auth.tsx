@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getSiteUrl, isSupabaseConfigured } from "@/lib/supabase/config";
@@ -10,8 +10,14 @@ export type AuthMode = "sign-in" | "sign-up";
 export function getAuthCallbackUrl() {
   const origin =
     typeof window === "undefined" ? getSiteUrl() : window.location.origin;
+  const next =
+    typeof window === "undefined"
+      ? "/"
+      : `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const callbackUrl = new URL("/auth/callback", origin.replace(/\/$/, ""));
+  callbackUrl.searchParams.set("next", next);
 
-  return `${origin.replace(/\/$/, "")}/auth/callback?next=/`;
+  return callbackUrl.toString();
 }
 
 export function getErrorMessage(error: unknown) {
@@ -188,6 +194,47 @@ export function useAuth() {
     handleGoogleAuth,
     handleSignOut,
   };
+}
+
+export function PBSignupGate({
+  isSignedIn,
+  onSignUp,
+  title,
+  body,
+  ctaLabel = "Sign up to unlock",
+  note = "Free account. No card credentials required.",
+  className = "",
+  children,
+}: {
+  isSignedIn: boolean;
+  onSignUp: () => void;
+  title: string;
+  body: string;
+  ctaLabel?: string;
+  note?: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  if (isSignedIn) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div className={"pb-gate" + (className ? " " + className : "")}>
+      <div className="pb-gate-preview" aria-hidden="true" inert>
+        {children}
+      </div>
+      <div className="pb-gate-panel">
+        <span className="pb-gate-kicker">Account required</span>
+        <h3>{title}</h3>
+        <p>{body}</p>
+        <button type="button" className="pb-gate-btn" onClick={onSignUp}>
+          {ctaLabel}
+        </button>
+        <span className="pb-gate-note">{note}</span>
+      </div>
+    </div>
+  );
 }
 
 type AuthModalProps = Pick<
