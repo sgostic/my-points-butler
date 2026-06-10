@@ -67,15 +67,13 @@ function applyStickyVariant(request: NextRequest, response: NextResponse) {
 
   const storedVariant = asVariant(request.cookies.get(VARIANT_COOKIE)?.value);
   const requestedVariant = asVariant(request.nextUrl.searchParams.get("variant"));
-  const landedVariant = requestedVariant ?? DEFAULT_VARIANT;
 
   if (!storedVariant) {
-    setVariantCookie(response, landedVariant);
+    setVariantCookie(response, requestedVariant ?? DEFAULT_VARIANT);
     return response;
   }
 
-  if (storedVariant === requestedVariant) {
-    setVariantCookie(response, storedVariant);
+  if (request.nextUrl.searchParams.has("variant")) {
     return response;
   }
 
