@@ -10,6 +10,7 @@ import { WorldMap } from "../variant-a/world-map";
 import { PBModeNav } from "../mode-nav";
 import { AuthModal, PBSignupGate, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
+import { PBFooter } from "../footer";
 import { pbEta, pbPlanGoals, type GoalPlan } from "./goals";
 import {
   EVENTS,
@@ -20,6 +21,7 @@ import {
 import "../variant-a/variant-a.css";
 import "../variant-b/variant-b.css";
 import "./variant-c.css";
+import ValueChat from "../value-chat";
 
 const DOT_COLOR = "#C2AE9F";
 const DEFAULT_GOALS = ["tokyo", "maldives", "capetown"];
@@ -395,31 +397,6 @@ function PBHowGoals() {
   );
 }
 
-function PBFooter() {
-  return (
-    <footer className="pb-footer">
-      <div className="pb-footer-inner">
-        <div className="pb-footer-brand">
-          <span className="pb-brand-mark sm" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-              <path
-                d="M12 3c-3.3 0-6 2.6-6 5.8 0 1.8.9 3.2 2 4.2v2h8v-2c1.1-1 2-2.4 2-4.2C18 5.6 15.3 3 12 3Z"
-                fill="currentColor"
-              />
-              <rect x="7" y="16.5" width="10" height="2.4" rx="1.2" fill="currentColor" />
-              <circle cx="12" cy="20.4" r="1.4" fill="currentColor" />
-            </svg>
-          </span>
-          My Points Butler
-        </div>
-        <p className="pb-footer-note">
-          mypointsbutler.com · Targets use forecast best-window pricing and update as the market moves.
-        </p>
-      </div>
-    </footer>
-  );
-}
-
 export default function VariantC() {
   const auth = useAuth();
   const [goalIds, setGoalIds] = useState(DEFAULT_GOALS);
@@ -521,6 +498,7 @@ export default function VariantC() {
       <PBHowGoals />
       <PBFooter />
       {auth.isAuthOpen ? <AuthModal {...auth} /> : null}
+      <ValueChat />
     </div>
   );
 }

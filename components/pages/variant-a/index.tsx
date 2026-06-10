@@ -18,6 +18,7 @@ import {
 import { WorldMap } from "./world-map";
 import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
+import { PBFooter } from "../footer";
 import {
   EVENTS,
   track,
@@ -26,6 +27,7 @@ import {
   trackPointsEnteredDebounced,
 } from "@/lib/analytics";
 import "./variant-a.css";
+import ValueChat from "../value-chat";
 
 const TONE_VAR: Record<Tone, string> = {
   save: "var(--save)",
@@ -571,25 +573,6 @@ function PBHow() {
   );
 }
 
-function PBFooter() {
-  return (
-    <footer className="pb-footer">
-      <div className="pb-footer-inner">
-        <div className="pb-footer-brand">
-          <span className="pb-brand-mark sm" aria-hidden="true">
-            <ButlerMark size={16} />
-          </span>
-          My Points Butler
-        </div>
-        <p className="pb-footer-note">
-          mypointsbutler.com · Forecasts are estimates, not guarantees. Always confirm award space before
-          transferring points.
-        </p>
-      </div>
-    </footer>
-  );
-}
-
 export default function VariantA() {
   const auth = useAuth();
   const [selectedId, setSelectedId] = useState("maldives");
@@ -637,6 +620,7 @@ export default function VariantA() {
       <PBHow />
       <PBFooter />
       {auth.isAuthOpen ? <AuthModal {...auth} /> : null}
+      <ValueChat />
     </div>
   );
 }

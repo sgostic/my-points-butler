@@ -10,6 +10,7 @@ import { DESTINATIONS, summarize, fmt, type Destination } from "../variant-a/dat
 import { WorldMap } from "../variant-a/world-map";
 import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
+import { PBFooter } from "../footer";
 import {
   EVENTS,
   track,
@@ -33,6 +34,7 @@ import {
 } from "./wallet";
 import "../variant-a/variant-a.css";
 import "./variant-b.css";
+import ValueChat from "../value-chat";
 
 const TONE_VAR = {
   save: "var(--save)",
@@ -683,25 +685,6 @@ function PBHowAlerts() {
   );
 }
 
-function PBFooter() {
-  return (
-    <footer className="pb-footer">
-      <div className="pb-footer-inner">
-        <div className="pb-footer-brand">
-          <span className="pb-brand-mark sm" aria-hidden="true">
-            <ButlerMark size={16} />
-          </span>
-          My Points Butler
-        </div>
-        <p className="pb-footer-note">
-          mypointsbutler.com · Balances and forecasts are estimates. We never store card credentials — just
-          the point totals you enter.
-        </p>
-      </div>
-    </footer>
-  );
-}
-
 export default function VariantB() {
   const auth = useAuth();
   const [selectedId, setSelectedId] = useState("maldives");
@@ -751,6 +734,7 @@ export default function VariantB() {
       <PBHowAlerts />
       <PBFooter />
       {auth.isAuthOpen ? <AuthModal {...auth} /> : null}
+      <ValueChat />
     </div>
   );
 }
