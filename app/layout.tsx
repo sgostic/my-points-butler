@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Suspense } from "react";
 import { AnalyticsProvider } from "@/lib/analytics";
+import { getSiteUrl } from "@/lib/supabase/config";
 import "./globals.css";
 
 // Warm, editorial single-typeface system (matches the points-guide vibe).
@@ -28,9 +29,33 @@ const spaceGrotesk = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: "My Points Butler — Use now or save?",
   description:
     "Your personal miles concierge. Compare today's award cost against the cheapest window ahead — so you spend points on the right trip.",
+  openGraph: {
+    title: "My Points Butler — Use now or save?",
+    description:
+      "Your personal miles concierge. Compare today's award cost against the cheapest window ahead — so you spend points on the right trip.",
+    images: [
+      {
+        url: "/images/sunny-beach.webp",
+        alt: "Sunny beach destination preview for My Points Butler.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "My Points Butler — Use now or save?",
+    description:
+      "Your personal miles concierge. Compare today's award cost against the cheapest window ahead — so you spend points on the right trip.",
+    images: ["/images/sunny-beach.webp"],
+  },
+  icons: {
+    icon: "/icon",
+    shortcut: "/icon",
+    apple: "/icon",
+  },
 };
 
 export const viewport: Viewport = {

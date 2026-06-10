@@ -392,21 +392,15 @@ a { color: inherit; text-decoration: none; }
 .pb-hero { position: relative; min-height: 760px; display: flex; align-items: center;
   padding: 120px clamp(20px, 5vw, 64px) 70px; isolation: isolate; }
 .pb-hero-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
-/* Vibrant gradient hero background */
+/* Shared hero image background */
 .pb-hero-photo {
   position: absolute; inset: 0; width: 100%; height: 100%; display: block;
-  background:
-    radial-gradient(120% 95% at 84% -10%, #F9A487 0%, transparent 50%),
-    radial-gradient(130% 120% at 2% 6%, #1B8F70 0%, transparent 50%),
-    radial-gradient(120% 130% at 58% 112%, #0B463A 0%, transparent 58%),
-    linear-gradient(155deg, #0E5A4A 0%, #0C4A3E 58%, #103B33 120%);
+  background: center / cover no-repeat url("/images/sunny-beach.webp");
 }
 .pb-hero-bg::after {
   content: ""; position: absolute; inset: 0; z-index: -1;
   background:
-    radial-gradient(120% 90% at 82% 2%, #FBB89C 0%, transparent 54%),
-    radial-gradient(120% 120% at 8% 18%, #1B8F70 0%, transparent 52%),
-    linear-gradient(160deg, #0E5A4A 0%, #0C4A3E 60%, #0B463A 120%);
+    linear-gradient(180deg, rgba(6, 34, 55, 0.14) 0%, rgba(6, 34, 55, 0.34) 100%);
 }
 .pb-hero-scrim { position: absolute; inset: 0;
   background: linear-gradient(105deg, rgba(20,12,8,.55) 0%, rgba(20,12,8,.26) 42%, rgba(20,12,8,.08) 100%); }
