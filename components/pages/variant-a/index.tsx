@@ -4,7 +4,7 @@
    App shell, hero with dotted world-map picker, verdict "savings meter",
    and a tabbed Flights / Hotels comparison table. */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DESTINATIONS,
   summarize,
@@ -18,6 +18,13 @@ import {
 import { WorldMap } from "./world-map";
 import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
+import {
+  EVENTS,
+  track,
+  trackGate,
+  trackMapPin,
+  trackPointsEnteredDebounced,
+} from "@/lib/analytics";
 import "./variant-a.css";
 
 const TONE_VAR: Record<Tone, string> = {
@@ -154,6 +161,10 @@ function PBVerdict({
   const pct = Math.round(Math.abs(best.v.pct) * 100);
   const netPct = Math.round(Math.abs(summary.netPct) * 100);
 
+  useEffect(() => {
+    track(EVENTS.VERDICT_VIEWED, { variant: "a", destId: dest.id, tone, netPct });
+  }, [dest.id, tone, netPct]);
+
   const HEADLINES: Record<Tone, string[]> = {
     save: ["Waiting could pay off.", "Hold your points.", "Don't burn them yet."],
     now: ["Prices are edging up.", "Lock it in now.", "Book before it's gone."],
@@ -250,7 +261,14 @@ function PBVerdict({
         <button
           type="button"
           className={"pb-vc-cta" + (isSignedIn ? "" : " pb-gated-action")}
-          onClick={() => (isSignedIn ? setFeedback(true) : onSignUp())}
+          onClick={() => {
+            if (isSignedIn) {
+              setFeedback(true);
+            } else {
+              trackGate("verdict", "a");
+              onSignUp();
+            }
+          }}
         >
           {ctaLabel}
         </button>
@@ -346,7 +364,13 @@ function PBLockedOfferRow({
       </div>
       <div className="pb-row-lock-cta">
         <span>Unlock this option and every forecast</span>
-        <button type="button" onClick={onSignUp}>
+        <button
+          type="button"
+          onClick={() => {
+            trackGate("locked_offer_row", "a");
+            onSignUp();
+          }}
+        >
           Sign up
         </button>
       </div>
@@ -367,13 +391,17 @@ function PBTable({
 }) {
   const [tab, setTab] = useState<"flights" | "hotels">("flights");
   const rows = tab === "flights" ? dest.flights : dest.hotels;
+  const switchTab = (next: "flights" | "hotels") => {
+    setTab(next);
+    track(EVENTS.RESULT_TAB_SWITCHED, { variant: "a", tab: next, destId: dest.id });
+  };
   return (
     <div className="pb-table-wrap">
       <div className="pb-tabs">
         <button
           type="button"
           className={"pb-tab" + (tab === "flights" ? " is-on" : "")}
-          onClick={() => setTab("flights")}
+          onClick={() => switchTab("flights")}
         >
           <span className="pb-tab-ico" aria-hidden="true">
             ✈
@@ -384,7 +412,7 @@ function PBTable({
         <button
           type="button"
           className={"pb-tab" + (tab === "hotels" ? " is-on" : "")}
-          onClick={() => setTab("hotels")}
+          onClick={() => switchTab("hotels")}
         >
           <span className="pb-tab-ico" aria-hidden="true">
             ⌂
@@ -434,7 +462,11 @@ function PBBalanceInput({
           min={0}
           step={1000}
           value={Number.isFinite(balance) ? balance : 0}
-          onChange={(e) => onBalanceChange(Math.max(0, Number(e.target.value) || 0))}
+          onChange={(e) => {
+            const next = Math.max(0, Number(e.target.value) || 0);
+            onBalanceChange(next);
+            trackPointsEnteredDebounced("balance", next, "a");
+          }}
           aria-label="Your points balance"
         />
         <span className="pb-balance-input-unit">pts</span>
@@ -569,6 +601,7 @@ export default function VariantA() {
 
   const onSelect = (id: string) => {
     setSelectedId(id);
+    trackMapPin(id, "select", "a");
     if (typeof window !== "undefined") {
       const el = document.getElementById("compare");
       if (el) window.scrollTo({ top: el.offsetTop - 12, behavior: "smooth" });

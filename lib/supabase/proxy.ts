@@ -6,11 +6,42 @@ import {
   isSupabaseConfigured,
 } from "./config";
 
+/* Durable anonymous visitor id. `pb_vid` is HTTP-only (authoritative,
+   read server-side by /api/track); `pb_vid_pub` mirrors it so the analytics
+   client can echo it on beacon requests. ~2 year lifetime → returning-visitor
+   analysis survives across sessions. */
+const VISITOR_COOKIE = "pb_vid";
+const VISITOR_COOKIE_PUBLIC = "pb_vid_pub";
+const VISITOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 * 2; // ~2 years
+
+/** Ensure the visitor cookies exist on the response, minting a new id if absent. */
+function ensureVisitorCookie(request: NextRequest, response: NextResponse) {
+  if (request.cookies.get(VISITOR_COOKIE)) return;
+
+  const visitorId = crypto.randomUUID();
+  const secure = process.env.NODE_ENV === "production";
+
+  response.cookies.set(VISITOR_COOKIE, visitorId, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure,
+    path: "/",
+    maxAge: VISITOR_COOKIE_MAX_AGE,
+  });
+  response.cookies.set(VISITOR_COOKIE_PUBLIC, visitorId, {
+    httpOnly: false,
+    sameSite: "lax",
+    secure,
+    path: "/",
+    maxAge: VISITOR_COOKIE_MAX_AGE,
+  });
+}
+
 export async function updateSession(request: NextRequest) {
   if (!isSupabaseConfigured()) {
-    return NextResponse.next({
-      request,
-    });
+    const response = NextResponse.next({ request });
+    ensureVisitorCookie(request, response);
+    return response;
   }
 
   let supabaseResponse = NextResponse.next({
@@ -43,6 +74,10 @@ export async function updateSession(request: NextRequest) {
   );
 
   await supabase.auth.getUser();
+
+  // Mint the visitor cookie after the auth refresh so it survives the
+  // potential response re-creation inside setAll above.
+  ensureVisitorCookie(request, supabaseResponse);
 
   return supabaseResponse;
 }

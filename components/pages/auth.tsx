@@ -4,6 +4,7 @@ import type { FormEvent, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getSiteUrl, isSupabaseConfigured } from "@/lib/supabase/config";
+import { EVENTS, track } from "@/lib/analytics";
 
 export type AuthMode = "sign-in" | "sign-up";
 
@@ -72,6 +73,7 @@ export function useAuth() {
   }, [isConfigured]);
 
   function openAuthModal(mode: AuthMode) {
+    track(EVENTS.AUTH_MODAL_OPENED, { mode });
     setAuthMode(mode);
     setIsAuthOpen(true);
     setMessage(
@@ -111,6 +113,7 @@ export function useAuth() {
         if (signUpError) throw signUpError;
 
         if (data.session) {
+          track(EVENTS.SIGNUP_COMPLETED, { method: "email" });
           setIsAuthOpen(false);
           return;
         }
@@ -124,6 +127,7 @@ export function useAuth() {
       });
       if (signInError) throw signInError;
 
+      track(EVENTS.SIGNIN_COMPLETED, { method: "email" });
       setIsAuthOpen(false);
     } catch (authError) {
       setError(getErrorMessage(authError));
@@ -165,6 +169,7 @@ export function useAuth() {
       const supabase = createClient();
       const { error: signOutError } = await supabase.auth.signOut();
       if (signOutError) throw signOutError;
+      track(EVENTS.SIGNOUT_COMPLETED);
       setUserEmail("");
     } catch {
       // Ignore sign-out errors.
@@ -228,7 +233,16 @@ export function PBSignupGate({
         <span className="pb-gate-kicker">Account required</span>
         <h3>{title}</h3>
         <p>{body}</p>
-        <button type="button" className="pb-gate-btn" onClick={onSignUp}>
+        <button
+          type="button"
+          className="pb-gate-btn"
+          onClick={() => {
+            track(EVENTS.GATE_UNLOCK_CLICKED, {
+              gateContext: className || title,
+            });
+            onSignUp();
+          }}
+        >
           {ctaLabel}
         </button>
         <span className="pb-gate-note">{note}</span>

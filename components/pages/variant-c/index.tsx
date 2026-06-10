@@ -11,6 +11,12 @@ import { PBModeNav } from "../mode-nav";
 import { AuthModal, PBSignupGate, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
 import { pbEta, pbPlanGoals, type GoalPlan } from "./goals";
+import {
+  EVENTS,
+  track,
+  trackMapPin,
+  trackPointsEnteredDebounced,
+} from "@/lib/analytics";
 import "../variant-a/variant-a.css";
 import "../variant-b/variant-b.css";
 import "./variant-c.css";
@@ -59,7 +65,11 @@ function PBGoalsEngine({
             className="pb-input pb-input-wide"
             inputMode="numeric"
             value={fmt(current)}
-            onChange={(e) => onCurrent(parseInt(e.target.value.replace(/[^0-9]/g, ""), 10) || 0)}
+            onChange={(e) => {
+              const next = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10) || 0;
+              onCurrent(next);
+              trackPointsEnteredDebounced("current", next, "c");
+            }}
           />
         </label>
         <div className="pb-field pb-field-grow">
@@ -74,7 +84,11 @@ function PBGoalsEngine({
             max={30000}
             step={500}
             value={spend}
-            onChange={(e) => onSpend(parseInt(e.target.value, 10))}
+            onChange={(e) => {
+              const next = parseInt(e.target.value, 10);
+              onSpend(next);
+              trackPointsEnteredDebounced("monthly_spend", next, "c");
+            }}
           />
           <div className="pb-range-scale">
             <span>$0</span>
@@ -420,6 +434,12 @@ export default function VariantC() {
   const plans = pbPlanGoals(goals, current, earnFromSpend(spend));
 
   const onToggle = (id: string) => {
+    const isAdding = !goalIds.includes(id);
+    trackMapPin(id, "toggle", "c");
+    track(isAdding ? EVENTS.GOAL_ADDED : EVENTS.GOAL_REMOVED, {
+      destId: id,
+      totalGoals: isAdding ? goalIds.length + 1 : goalIds.length - 1,
+    });
     // Add a newly-tracked trip at the top (highest priority) so it's funded
     // from your balance first — its progress then reflects your points.
     setGoalIds((g) => (g.includes(id) ? g.filter((x) => x !== id) : [id, ...g]));
@@ -434,12 +454,20 @@ export default function VariantC() {
       }, 60);
     }
   };
-  const onRemove = (id: string) => setGoalIds((g) => g.filter((x) => x !== id));
+  const onRemove = (id: string) => {
+    track(EVENTS.GOAL_REMOVED, { destId: id, totalGoals: goalIds.length - 1 });
+    setGoalIds((g) => g.filter((x) => x !== id));
+  };
   const move = (id: string, dir: number) =>
     setGoalIds((g) => {
       const i = g.indexOf(id);
       const j = i + dir;
       if (j < 0 || j >= g.length) return g;
+      track(EVENTS.GOAL_REORDERED, {
+        destId: id,
+        direction: dir < 0 ? "up" : "down",
+        newIndex: j,
+      });
       const copy = g.slice();
       [copy[i], copy[j]] = [copy[j], copy[i]];
       return copy;

@@ -44,3 +44,14 @@ The homepage (`app/page.tsx`) is an A/B test. It's a Server Component that await
 - **`components/pages/variant-d/`** — *Personalized trip discovery* (taste-driven feed, no map). Reuses data + `PBModeNav`; adds `variant-d.css`. Imports `variant-a.css` + `variant-b.css` + `variant-d.css`.
 
 CSS layering mirrors the original bundle: every variant loads `variant-a.css` (base) first; B/C/D then load `variant-b.css` (shared alerts components) before their own. When adding destinations or changing economics/metadata, edit `components/pages/variant-a/data.ts` — **all four variants consume it**. Reuse `world-map.tsx`, `mode-nav.tsx`, and the shared stylesheets rather than duplicating.
+
+## Analytics & event tracking
+
+User activity is logged to Supabase as an append-only `events` stream plus normalized projection tables. **Full reference: [`docs/ANALYTICS.md`](docs/ANALYTICS.md).** The essentials:
+
+- **Schema:** `supabase/migrations/0001_analytics.sql` (run in Supabase). Tables: `visitors`, `sessions`, `events`, `feedback_submissions`, `email_subscriptions`, `contact_messages`, `donations`, `chat_messages`. RLS is locked down — writes happen only via the service-role key.
+- **Client:** `lib/analytics/` — call `track(EVENTS.X, { ... })` (or a typed helper like `trackCardAdded`, `trackGate`, `trackFeedback`) from any client component. `AnalyticsProvider` (mounted in `app/layout.tsx`) auto-captures page views, scroll depth, time-on-page, and visitor→user linking.
+- **Ingest:** `app/api/track/route.ts` (Node runtime) batches in via `navigator.sendBeacon`/`fetch`, writes with `lib/supabase/admin.ts` (service role). Needs `SUPABASE_SERVICE_ROLE_KEY` or `STORAGE_SUPABASE_SERVICE_ROLE_KEY`.
+- **Identity:** durable `pb_vid` cookie minted in `lib/supabase/proxy.ts`; per-tab `pb_sid` session.
+- **Rule:** canonical event names live in BOTH the SQL `event_name` enum and the `EVENTS` map in `lib/analytics/events.ts` — keep them in sync.
+- **Not-yet-built features** (share, email subscribe, contact, donate, chatbot) already have tables + ingest routing + `track*` helpers ready; just call the helper when you build the UI. See `docs/ANALYTICS.md` → "To wire when the feature is built".

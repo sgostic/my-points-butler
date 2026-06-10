@@ -11,6 +11,15 @@ import { WorldMap } from "../variant-a/world-map";
 import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
 import {
+  EVENTS,
+  track,
+  trackCardAdded,
+  trackCardRemoved,
+  trackGate,
+  trackMapPin,
+  trackSubscribe,
+} from "@/lib/analytics";
+import {
   PB_PROGRAMS,
   pbPools,
   pbMatch,
@@ -115,6 +124,7 @@ function PBWalletBuilder({
     const pts = parseInt(String(amount).replace(/[^0-9]/g, ""), 10);
     if (!pts || pts <= 0) return;
     onAdd({ id: Date.now(), type, program, points: pts });
+    trackCardAdded(type, program, pts);
     setAmount("");
   };
 
@@ -193,7 +203,10 @@ function PBWalletBuilder({
                 type="button"
                 className="pb-wchip-x"
                 aria-label={"Remove " + w.program}
-                onClick={() => onRemove(w.id)}
+                onClick={() => {
+                  trackCardRemoved(w.id, w.program, w.type);
+                  onRemove(w.id);
+                }}
               >
                 ×
               </button>
@@ -379,6 +392,8 @@ function PBAlertCTA({
   // The alert isn't really wired to a backend — confirm the (mock) success and
   // prompt the tester for feedback.
   const setAlert = () => {
+    track(EVENTS.ALERT_CREATED, { destId: dest.id, email, watching });
+    if (valid) trackSubscribe(email, "alert_cta", "b");
     setSent(true);
     setFeedback(true);
   };
@@ -393,7 +408,14 @@ function PBAlertCTA({
             We&apos;ll keep this match list tied to your balances and notify you when one of{" "}
             <strong>{watching}</strong> watched award{watching === 1 ? "" : "s"} drops into range.
           </p>
-          <button type="button" className="pb-al-btn pb-al-btn-full" onClick={onSignUp}>
+          <button
+            type="button"
+            className="pb-al-btn pb-al-btn-full"
+            onClick={() => {
+              trackGate("alert_gate", "b");
+              onSignUp();
+            }}
+          >
             Sign up to create alert
           </button>
           <div className="pb-al-meta">
@@ -555,7 +577,13 @@ function PBLockedMatchRow({
       </div>
       <div className="pb-row-lock-cta">
         <span>Unlock all wallet matches for this tab</span>
-        <button type="button" onClick={onSignUp}>
+        <button
+          type="button"
+          onClick={() => {
+            trackGate("locked_match_row", "b");
+            onSignUp();
+          }}
+        >
           Sign up
         </button>
       </div>
@@ -577,13 +605,17 @@ function PBMatchTable({
   const [tab, setTab] = useState<"flights" | "hotels">("flights");
   const rows = tab === "flights" ? dest.flights : dest.hotels;
   const pool = pbPoolForTab(pools, tab);
+  const switchTab = (next: "flights" | "hotels") => {
+    setTab(next);
+    track(EVENTS.RESULT_TAB_SWITCHED, { variant: "b", tab: next, destId: dest.id });
+  };
   return (
     <div className="pb-table-wrap">
       <div className="pb-tabs">
         <button
           type="button"
           className={"pb-tab" + (tab === "flights" ? " is-on" : "")}
-          onClick={() => setTab("flights")}
+          onClick={() => switchTab("flights")}
         >
           <span className="pb-tab-ico" aria-hidden="true">
             ✈
@@ -594,7 +626,7 @@ function PBMatchTable({
         <button
           type="button"
           className={"pb-tab" + (tab === "hotels" ? " is-on" : "")}
-          onClick={() => setTab("hotels")}
+          onClick={() => switchTab("hotels")}
         >
           <span className="pb-tab-ico" aria-hidden="true">
             ⌂
@@ -682,6 +714,7 @@ export default function VariantB() {
 
   const onSelect = (id: string) => {
     setSelectedId(id);
+    trackMapPin(id, "select", "b");
     if (typeof window !== "undefined") {
       const el = document.getElementById("match");
       if (el) window.scrollTo({ top: el.offsetTop - 12, behavior: "smooth" });

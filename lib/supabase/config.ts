@@ -38,6 +38,29 @@ export function getSupabasePublishableKey() {
   return supabaseKey;
 }
 
+export function hasServiceRoleKey() {
+  return Boolean(
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.STORAGE_SUPABASE_SERVICE_ROLE_KEY,
+  );
+}
+
+/* Server-only. Never expose this key to the browser (no NEXT_PUBLIC_ prefix).
+   Used exclusively by app/api/track to write analytics tables (bypasses RLS). */
+export function getServiceRoleKey() {
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.STORAGE_SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceRoleKey) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY or STORAGE_SUPABASE_SERVICE_ROLE_KEY is not configured.",
+    );
+  }
+
+  return serviceRoleKey;
+}
+
 export function getSiteUrl() {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");

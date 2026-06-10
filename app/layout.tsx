@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
+import { AnalyticsProvider } from "@/lib/analytics";
 import "./globals.css";
 
 // Warm, editorial single-typeface system (matches the points-guide vibe).
@@ -45,7 +47,12 @@ export default function RootLayout({
       lang="en"
       className={`${bricolage.variable} ${jakarta.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {/* useSearchParams in the provider requires a Suspense boundary (Next 16). */}
+        <Suspense fallback={null}>
+          <AnalyticsProvider>{children}</AnalyticsProvider>
+        </Suspense>
+      </body>
     </html>
   );
 }

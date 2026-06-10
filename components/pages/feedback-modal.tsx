@@ -7,6 +7,7 @@
    which variant stylesheet is loaded. */
 
 import { useEffect, useState } from "react";
+import { trackFeedback } from "@/lib/analytics";
 import "./feedback-modal.css";
 
 type Scale = "yes" | "maybe" | "no";
@@ -42,15 +43,15 @@ export function PBFeedbackModal({
   }, [onClose]);
 
   const submit = () => {
-    // No backend yet — log the feedback so we can collect it during testing.
-    console.log("[My Points Butler] prototype feedback", {
-      context: context ?? null,
+    // Persist via the analytics pipeline → events + feedback_submissions
+    // (also emits pay_intent when wouldPay !== "no").
+    trackFeedback({
+      context: context ?? undefined,
       liked,
       disliked,
       helps,
       wouldPay,
       monthlyPrice: price || null,
-      at: new Date().toISOString(),
     });
     setDone(true);
   };

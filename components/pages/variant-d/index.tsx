@@ -4,7 +4,7 @@
    "See trips you can book with the points you already have. ⭐"
    Reuses Variant A's data and the shared alerts/base styles. */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DESTINATIONS,
   INTERESTS,
@@ -17,6 +17,12 @@ import {
 import { PBModeNav } from "../mode-nav";
 import { AuthModal, PBSignupGate, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
+import {
+  EVENTS,
+  track,
+  trackGate,
+  trackPointsEnteredDebounced,
+} from "@/lib/analytics";
 import "../variant-a/variant-a.css";
 import "../variant-b/variant-b.css";
 import "./variant-d.css";
@@ -79,7 +85,11 @@ function PBTasteBar({
             className="pb-input pb-input-wide"
             inputMode="numeric"
             value={fmt(points)}
-            onChange={(e) => onPoints(parseInt(e.target.value.replace(/[^0-9]/g, ""), 10) || 0)}
+            onChange={(e) => {
+              const next = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10) || 0;
+              onPoints(next);
+              trackPointsEnteredDebounced("points", next, "d");
+            }}
           />
         </label>
         <button
@@ -307,12 +317,26 @@ function PBDealModal({
             <button
               type="button"
               className="pb-modal-book"
-              onClick={() => (isSignedIn ? setFeedback(true) : onSignUp())}
+              onClick={() => {
+                if (isSignedIn) {
+                  setFeedback(true);
+                } else {
+                  trackGate("deal_modal", "d");
+                  onSignUp();
+                }
+              }}
             >
               {isSignedIn ? `Book with ${fmt(cost)} pts →` : "Sign up to save this deal →"}
             </button>
           ) : !isSignedIn ? (
-            <button type="button" className="pb-modal-book" onClick={onSignUp}>
+            <button
+              type="button"
+              className="pb-modal-book"
+              onClick={() => {
+                trackGate("deal_modal", "d");
+                onSignUp();
+              }}
+            >
               Sign up to track this gap →
             </button>
           ) : (
@@ -456,8 +480,28 @@ export default function VariantD() {
   const isSignedIn = Boolean(auth.userEmail);
   const openSignUp = () => auth.openAuthModal("sign-up");
 
-  const onToggle = (tag: string) =>
+  const onToggle = (tag: string) => {
+    const isOn = !selected.includes(tag);
+    track(EVENTS.INTEREST_TOGGLED, {
+      tag,
+      on: isOn,
+      selected: isOn ? [...selected, tag] : selected.filter((x) => x !== tag),
+    });
     setSelected((s) => (s.includes(tag) ? s.filter((x) => x !== tag) : [...s, tag]));
+  };
+  const onFits = (v: boolean) => {
+    track(EVENTS.FITS_ONLY_TOGGLED, { on: v });
+    setFitsOnly(v);
+  };
+  const onOpenTrip = (s: ScoredTrip) => {
+    track(EVENTS.TRIP_MODAL_OPENED, {
+      destId: s.d.id,
+      cost: s.cost,
+      affordable: s.affordable,
+      vibePct: s.pct,
+    });
+    setOpenTrip(s);
+  };
 
   const scored: ScoredTrip[] = DESTINATIONS.map((d) => {
     const matched = d.tags.filter((tag) => selected.includes(tag));
@@ -477,6 +521,17 @@ export default function VariantD() {
   );
 
   const affordableCount = scored.filter((s) => s.affordable).length;
+
+  // Report the result set after filters settle (skips the initial mount).
+  const resultCount = list.length;
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    track(EVENTS.RESULT_FILTERED, { selected, fitsOnly, resultCount });
+  }, [selected, fitsOnly, resultCount]);
 
   return (
     <div id="top" className="pb-app">
@@ -515,7 +570,7 @@ export default function VariantD() {
               points={points}
               onPoints={setPoints}
               fitsOnly={fitsOnly}
-              onFits={setFitsOnly}
+              onFits={onFits}
               count={list.length}
             />
           </div>
@@ -538,7 +593,7 @@ export default function VariantD() {
         ) : (
           <div className="pb-trip-grid">
             {list.map((s) => (
-              <PBTripCard key={s.d.id} s={s} selected={selected} onOpen={setOpenTrip} />
+              <PBTripCard key={s.d.id} s={s} selected={selected} onOpen={onOpenTrip} />
             ))}
           </div>
         )}
