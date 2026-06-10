@@ -467,12 +467,16 @@ function PBHero({
         <div className="pb-hero-copy">
           <span className="pb-eyebrow">Your personal miles concierge</span>
           <h1 className="pb-hero-title">
-            Use your miles now —<br /> or wait for the <em>trip of a lifetime?</em>
+            Use points now or save them for a better trip?
+            <br />
+            There&apos;s a right answer.
           </h1>
           <p className="pb-hero-lede">
-            Pick where you&apos;re dreaming of. Your butler compares today&apos;s award cost against the
-            cheapest window ahead — so you spend points on the right trip.
+            Get guidance based on your current points, future trips, and travel goals.
           </p>
+          <a className="pb-hero-cta" href="#compare">
+            Build My Points Travel Plan →
+          </a>
           <div className="pb-hero-chips">
             <span className="pb-chip">✈ Flights + 🏨 hotels</span>
             <span className="pb-chip">📉 Price forecasts</span>

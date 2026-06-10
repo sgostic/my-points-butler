@@ -1,7 +1,7 @@
 "use client";
 
 /* My Points Butler — Variant D: Personalized trip discovery.
-   "See trips you can book with your current points, based on places you like."
+   "See trips you can book with the points you already have. ⭐"
    Reuses Variant A's data and the shared alerts/base styles. */
 
 import { useEffect, useState } from "react";
@@ -498,12 +498,14 @@ export default function VariantD() {
           <div className="pb-hero-copy center">
             <span className="pb-eyebrow">Personalized trip discovery</span>
             <h1 className="pb-hero-title">
-              Trips you can book <em>right now</em> — built around your taste.
+              See trips you can book with the points you already have. ⭐
             </h1>
             <p className="pb-hero-lede">
-              No aspirational fantasy you can&apos;t afford. Tell us what you love and how many points you&apos;ve
-              got — we&apos;ll show you what&apos;s genuinely within reach.
+              Discover destinations that match your rewards wallet and travel preferences.
             </p>
+            <a className="pb-hero-cta" href="#discover">
+              Build My Points Travel Plan →
+            </a>
           </div>
           <div className="pb-hero-single">
             <PBTasteBar

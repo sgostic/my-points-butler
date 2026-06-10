@@ -420,6 +420,13 @@ a { color: inherit; text-decoration: none; }
   -webkit-background-clip: text; background-clip: text; color: transparent; }
 .pb-hero-lede { font-size: clamp(16px, 1.4vw, 19px); line-height: 1.5; color: rgba(255,255,255,.92);
   max-width: 46ch; margin: 20px 0 0; }
+.pb-hero-cta { display: inline-flex; align-items: center; justify-content: center; width: fit-content;
+  margin-top: 24px; border-radius: 999px; padding: 13px 20px;
+  background: linear-gradient(135deg, #FBD9A0, #F96A50); color: #2D160E;
+  font-family: var(--font-body); font-size: 15px; font-weight: 800;
+  box-shadow: 0 14px 34px rgba(249,106,80,.26); transition: transform .12s ease, filter .15s ease; }
+.pb-hero-cta:hover { filter: brightness(1.04); transform: translateY(-1px); }
+.pb-hero-cta:active { transform: translateY(1px); }
 .pb-hero-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
 .pb-chip { font-size: 13.5px; font-weight: 600; color: #fff; background: rgba(255,255,255,.15);
   border: 1px solid rgba(255,255,255,.28); padding: 8px 14px; border-radius: 999px; backdrop-filter: blur(6px); }

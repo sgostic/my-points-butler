@@ -241,12 +241,14 @@ function PBHeroAlerts({
         <div className="pb-hero-copy center">
           <span className="pb-eyebrow">Wallet-matched deal alerts</span>
           <h1 className="pb-hero-title">
-            Get alerted the moment a deal <em>fits your wallet.</em>
+            Get alerts when a deal matches your actual points balance. ⭐
           </h1>
           <p className="pb-hero-lede">
-            Tell us what you actually hold and where you want to go. We&apos;ll watch every award and ping
-            you the second one drops into your real points balance.
+            See whether transferring points could unlock better travel value.
           </p>
+          <a className="pb-hero-cta" href="#match">
+            Build My Points Travel Plan →
+          </a>
         </div>
         <div className="pb-hero-grid">
           <PBWalletBuilder wallet={wallet} onAdd={onAdd} onRemove={onRemove} />

@@ -1,7 +1,7 @@
 "use client";
 
 /* My Points Butler — Variant C: Goal tracking.
-   "Tell us your dream trips. We'll tell you what points to save, earn, or use."
+   "Tell us your dream trips. We'll tell you what points to save, earn, or use. ⭐"
    Reuses Variant A's world map + data and the shared alerts/base styles. */
 
 import { useState } from "react";
@@ -251,12 +251,14 @@ function PBHeroGoals({
         <div className="pb-hero-copy center">
           <span className="pb-eyebrow">Goal tracking</span>
           <h1 className="pb-hero-title">
-            Tell us your dream trips. <em>We&apos;ll plan the points.</em>
+            Tell us your dream trips. We&apos;ll tell you what points to save, earn, or use. ⭐
           </h1>
           <p className="pb-hero-lede">
-            Pin the places you&apos;re chasing. We&apos;ll tell you exactly what to save, earn, or use — and
-            when each dream becomes bookable.
+            Build a points strategy around the trips you actually want to take.
           </p>
+          <a className="pb-hero-cta" href="#goals">
+            Build My Points Travel Plan →
+          </a>
         </div>
         <div className="pb-hero-grid">
           <PBGoalsEngine
