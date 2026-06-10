@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { trackChatMessage, trackChatOpened } from "@/lib/analytics";
 import "./chat.css";
 
 type Role = "user" | "assistant";
@@ -26,6 +27,7 @@ const fmt = (s: string) =>
     .replace(/\n/g, "<br>");
 
 export default function ValueChat() {
+  const [conversationId] = useState(() => crypto.randomUUID());
   const [open, setOpen] = useState(false);
   const [history, setHistory] = useState<Message[]>([]);
   // remaining is null until the server tells us the real count
@@ -46,6 +48,7 @@ export default function ValueChat() {
   }, [history, busy, open]);
 
   function openChat() {
+    trackChatOpened();
     setOpen(true);
     setTimeout(() => textRef.current?.focus(), 60);
   }
@@ -57,6 +60,7 @@ export default function ValueChat() {
     if (isLimitReached) return;
 
     const nextHistory: Message[] = [...history, { role: "user", content: trimmed }];
+    trackChatMessage(conversationId, trimmed, "user");
     setHistory(nextHistory);
     setInput("");
     setShowSuggest(false);
@@ -68,10 +72,14 @@ export default function ValueChat() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [{ role: "user", content: trimmed }] }),
+        body: JSON.stringify({
+          conversationId,
+          messages: [{ role: "user", content: trimmed }],
+        }),
       });
 
       const data = (await response.json()) as {
+        conversationId?: string;
         message?: string;
         error?: string;
         remaining?: number;
@@ -79,6 +87,11 @@ export default function ValueChat() {
 
       if (response.status === 429) {
         setRemaining(0);
+        trackChatMessage(
+          data.conversationId ?? conversationId,
+          "You've reached the **5 message** limit. Sign up for unlimited access.",
+          "assistant",
+        );
         setHistory((h) => [
           ...h,
           { role: "assistant", content: "You've reached the **5 message** limit. Sign up for unlimited access." },
@@ -89,8 +102,14 @@ export default function ValueChat() {
       if (!response.ok || !data.message) throw new Error(data.error || "No response.");
 
       if (typeof data.remaining === "number") setRemaining(data.remaining);
+      trackChatMessage(data.conversationId ?? conversationId, data.message, "assistant");
       setHistory((h) => [...h, { role: "assistant", content: data.message as string }]);
     } catch {
+      trackChatMessage(
+        conversationId,
+        "Trouble connecting right now. Quick rule: if a transfer is worth more than **1.3¢/point** it usually beats cash and the portal — otherwise pay cash and keep your points.",
+        "assistant",
+      );
       setHistory((h) => [
         ...h,
         {

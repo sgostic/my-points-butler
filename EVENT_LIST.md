@@ -55,8 +55,14 @@ projection tables where noted). See `docs/ANALYTICS.md` for the full system.
 | `alert_created` | B deal-alert CTA | `{ destId, email, watching }` |
 | `email_subscribed` | B alert CTA → `email_subscriptions` | `{ email, source:"alert_cta", variant }` |
 
+### Chatbot
+| Event | Where | Payload |
+| --- | --- | --- |
+| `chat_opened` | chat launcher open | `{ variant }` |
+| `chat_message_sent` | chat send + assistant reply → `chat_messages` | `{ conversationId, content, role }` |
+
 ## Defined but NOT yet wired
 
 Tables, ingest routing, and `track*` helpers exist; no fire site yet:
-`cta_clicked`, `variant_switched`, `share_clicked`, `chat_opened`,
-`chat_message_sent`, `contact_submitted`, `donate_clicked`.
+`cta_clicked`, `variant_switched`, `share_clicked`, `contact_submitted`,
+`donate_clicked`.

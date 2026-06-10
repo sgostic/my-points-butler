@@ -1,8 +1,5 @@
 import OpenAI from "openai";
 import { cookies } from "next/headers";
-import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
-import { hasServiceRoleKey, isSupabaseConfigured } from "@/lib/supabase/config";
 
 const CHAT_LIMIT = 5;
 const LIMIT_COOKIE = "pb_chat_count";
@@ -113,47 +110,6 @@ function getGuardRefusal(message: string) {
   return null;
 }
 
-async function persistChatTurn(
-  conversationId: string,
-  userMessage: string,
-  assistantMessage: string,
-) {
-  if (!isSupabaseConfigured() || !hasServiceRoleKey()) return;
-  try {
-    const cookieStore = await cookies();
-    const visitorId = cookieStore.get("pb_vid")?.value ?? null;
-    let userId: string | null = null;
-    try {
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      userId = user?.id ?? null;
-    } catch {
-      userId = null;
-    }
-    const admin = createAdminClient();
-    await admin.from("chat_messages").insert([
-      {
-        conversation_id: conversationId,
-        role: "user",
-        content: userMessage,
-        visitor_id: visitorId,
-        user_id: userId,
-      },
-      {
-        conversation_id: conversationId,
-        role: "assistant",
-        content: assistantMessage,
-        visitor_id: visitorId,
-        user_id: userId,
-      },
-    ]);
-  } catch {
-    /* best-effort */
-  }
-}
-
 function errorResponse(message: string, status: number) {
   return Response.json({ error: message }, { status });
 }
@@ -164,15 +120,22 @@ export async function POST(request: Request) {
       return errorResponse("OpenAI API key is not configured.", 500);
     }
 
+    const body = await request.json();
+    const conversationId =
+      body &&
+      typeof body === "object" &&
+      typeof (body as { conversationId?: unknown }).conversationId === "string"
+        ? (body as { conversationId: string }).conversationId
+        : crypto.randomUUID();
+
     const cookieStore = await cookies();
     const currentCount = readChatCount(cookieStore);
 
     if (currentCount >= CHAT_LIMIT) {
-      return Response.json({ error: "limit_reached", remaining: 0 }, { status: 429 });
+      return Response.json({ error: "limit_reached", remaining: 0, conversationId }, { status: 429 });
     }
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const body = await request.json();
     const parsedMessages = parseMessages(body);
 
     if (!parsedMessages)
@@ -184,21 +147,13 @@ export async function POST(request: Request) {
     if (!latestUserMessage)
       return errorResponse("Send at least one user chat message.", 400);
 
-    const conversationId =
-      body &&
-      typeof body === "object" &&
-      typeof (body as { conversationId?: unknown }).conversationId === "string"
-        ? (body as { conversationId: string }).conversationId
-        : crypto.randomUUID();
-
     const newCount = currentCount + 1;
     const remaining = CHAT_LIMIT - newCount;
 
     const guard = getGuardRefusal(latestUserMessage);
     if (guard) {
-      await persistChatTurn(conversationId, latestUserMessage, guard.message);
       return setChatCountCookie(
-        Response.json({ message: guard.message, remaining }),
+        Response.json({ message: guard.message, remaining, conversationId }),
         newCount,
       );
     }
@@ -220,20 +175,14 @@ export async function POST(request: Request) {
       asksForSensitiveData(assistantResponse) ||
       /```/.test(assistantResponse)
     ) {
-      await persistChatTurn(
-        conversationId,
-        latestUserMessage,
-        SENSITIVE_REFUSAL,
-      );
       return setChatCountCookie(
-        Response.json({ message: SENSITIVE_REFUSAL, remaining }),
+        Response.json({ message: SENSITIVE_REFUSAL, remaining, conversationId }),
         newCount,
       );
     }
 
-    await persistChatTurn(conversationId, latestUserMessage, assistantResponse);
     return setChatCountCookie(
-      Response.json({ message: assistantResponse, remaining }),
+      Response.json({ message: assistantResponse, remaining, conversationId }),
       newCount,
     );
   } catch (error) {
