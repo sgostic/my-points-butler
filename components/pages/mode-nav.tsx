@@ -8,10 +8,18 @@ export type ModeId = "planner" | "alerts" | "goals" | "discover";
 export function PBModeNav({
   balance,
   balanceLabel = "Wallet",
+  userEmail = "",
+  isSubmitting = false,
+  onSignIn,
+  onSignOut,
 }: {
   active: ModeId;
   balance: number;
   balanceLabel?: string;
+  userEmail?: string;
+  isSubmitting?: boolean;
+  onSignIn?: () => void;
+  onSignOut?: () => void;
 }) {
   return (
     <header className="pb-nav">
@@ -29,13 +37,19 @@ export function PBModeNav({
         <span className="pb-brand-name">My Points Butler</span>
       </a>
       <div className="pb-nav-right">
+        {userEmail ? <span className="pb-nav-user">{userEmail}</span> : null}
         <div className="pb-balance" title="Your points">
           <span className="pb-balance-label">{balanceLabel}</span>
           <span className="pb-balance-num">{fmt(balance)}</span>
           <span className="pb-balance-unit">pts</span>
         </div>
-        <button type="button" className="pb-btn pb-btn-ghost">
-          Sign in
+        <button
+          type="button"
+          className="pb-btn pb-btn-ghost"
+          disabled={isSubmitting}
+          onClick={userEmail ? onSignOut : onSignIn}
+        >
+          {userEmail ? "Sign out" : "Sign in"}
         </button>
       </div>
     </header>

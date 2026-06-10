@@ -8,6 +8,7 @@ import { useState } from "react";
 import { DESTINATIONS, fmt } from "../variant-a/data";
 import { WorldMap } from "../variant-a/world-map";
 import { PBModeNav } from "../mode-nav";
+import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
 import { pbEta, pbPlanGoals, type GoalPlan } from "./goals";
 import "../variant-a/variant-a.css";
@@ -333,6 +334,7 @@ function PBFooter() {
 }
 
 export default function VariantC() {
+  const auth = useAuth();
   const [goalIds, setGoalIds] = useState(DEFAULT_GOALS);
   const [current, setCurrent] = useState(206000);
   const [spend, setSpend] = useState(12000);
@@ -370,7 +372,15 @@ export default function VariantC() {
 
   return (
     <div id="top" className="pb-app">
-      <PBModeNav active="goals" balance={current} balanceLabel="Points" />
+      <PBModeNav
+        active="goals"
+        balance={current}
+        balanceLabel="Points"
+        userEmail={auth.userEmail}
+        isSubmitting={auth.isSubmitting}
+        onSignIn={() => auth.openAuthModal("sign-in")}
+        onSignOut={auth.handleSignOut}
+      />
       <PBHeroGoals
         goalIds={goalIds}
         onToggle={onToggle}
@@ -406,6 +416,7 @@ export default function VariantC() {
       </section>
       <PBHowGoals />
       <PBFooter />
+      {auth.isAuthOpen ? <AuthModal {...auth} /> : null}
     </div>
   );
 }

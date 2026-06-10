@@ -15,6 +15,7 @@ import {
   type Destination,
 } from "../variant-a/data";
 import { PBModeNav } from "../mode-nav";
+import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
 import "../variant-a/variant-a.css";
 import "../variant-b/variant-b.css";
@@ -371,6 +372,7 @@ function PBFooter() {
 }
 
 export default function VariantD() {
+  const auth = useAuth();
   const [selected, setSelected] = useState(["Beaches", "Food"]);
   const [points, setPoints] = useState(206000);
   const [fitsOnly, setFitsOnly] = useState(false);
@@ -400,7 +402,15 @@ export default function VariantD() {
 
   return (
     <div id="top" className="pb-app">
-      <PBModeNav active="discover" balance={points} balanceLabel="Points" />
+      <PBModeNav
+        active="discover"
+        balance={points}
+        balanceLabel="Points"
+        userEmail={auth.userEmail}
+        isSubmitting={auth.isSubmitting}
+        onSignIn={() => auth.openAuthModal("sign-in")}
+        onSignOut={auth.handleSignOut}
+      />
       <section className="pb-hero pb-hero-alerts pb-hero-discover" id="explore">
         <div className="pb-hero-bg">
           <div className="pb-hero-photo" />
@@ -465,6 +475,7 @@ export default function VariantD() {
           onClose={() => setOpenTrip(null)}
         />
       )}
+      {auth.isAuthOpen ? <AuthModal {...auth} /> : null}
     </div>
   );
 }

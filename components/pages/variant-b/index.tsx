@@ -8,6 +8,7 @@
 import { useState } from "react";
 import { DESTINATIONS, summarize, fmt, type Destination } from "../variant-a/data";
 import { WorldMap } from "../variant-a/world-map";
+import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
 import {
   PB_PROGRAMS,
@@ -50,7 +51,19 @@ const ButlerMark = ({ size = 20 }: { size?: number }) => (
 );
 
 /* ---------- Nav with planner ↔ alerts mode switch ---------- */
-function PBNavModes({ balance }: { balance: number }) {
+function PBNavModes({
+  balance,
+  userEmail,
+  isSubmitting,
+  onSignIn,
+  onSignOut,
+}: {
+  balance: number;
+  userEmail: string;
+  isSubmitting: boolean;
+  onSignIn: () => void;
+  onSignOut: () => void;
+}) {
   return (
     <header className="pb-nav">
       <a className="pb-brand" href="#top">
@@ -60,13 +73,19 @@ function PBNavModes({ balance }: { balance: number }) {
         <span className="pb-brand-name">My Points Butler</span>
       </a>
       <div className="pb-nav-right">
+        {userEmail ? <span className="pb-nav-user">{userEmail}</span> : null}
         <div className="pb-balance" title="Your combined wallet">
           <span className="pb-balance-label">Wallet</span>
           <span className="pb-balance-num">{fmt(balance)}</span>
           <span className="pb-balance-unit">pts</span>
         </div>
-        <button type="button" className="pb-btn pb-btn-ghost">
-          Sign in
+        <button
+          type="button"
+          className="pb-btn pb-btn-ghost"
+          disabled={isSubmitting}
+          onClick={userEmail ? onSignOut : onSignIn}
+        >
+          {userEmail ? "Sign out" : "Sign in"}
         </button>
       </div>
     </header>
@@ -571,6 +590,7 @@ function PBFooter() {
 }
 
 export default function VariantB() {
+  const auth = useAuth();
   const [selectedId, setSelectedId] = useState("maldives");
   const [wallet, setWallet] = useState<WalletEntry[]>(DEFAULT_WALLET);
   const dest = DESTINATIONS.find((d) => d.id === selectedId) ?? DESTINATIONS[0];
@@ -589,7 +609,13 @@ export default function VariantB() {
 
   return (
     <div id="top" className="pb-app">
-      <PBNavModes balance={pools.total} />
+      <PBNavModes
+        balance={pools.total}
+        userEmail={auth.userEmail}
+        isSubmitting={auth.isSubmitting}
+        onSignIn={() => auth.openAuthModal("sign-in")}
+        onSignOut={auth.handleSignOut}
+      />
       <PBHeroAlerts
         selectedId={selectedId}
         onSelect={onSelect}
@@ -608,6 +634,7 @@ export default function VariantB() {
       </section>
       <PBHowAlerts />
       <PBFooter />
+      {auth.isAuthOpen ? <AuthModal {...auth} /> : null}
     </div>
   );
 }

@@ -16,6 +16,7 @@ import {
   type Tone,
 } from "./data";
 import { WorldMap } from "./world-map";
+import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
 import "./variant-a.css";
 
@@ -41,7 +42,19 @@ const ButlerMark = ({ size = 20 }: { size?: number }) => (
 );
 
 /* ---------- Top navigation ---------- */
-function PBNav({ balance }: { balance: number }) {
+function PBNav({
+  balance,
+  userEmail,
+  isSubmitting,
+  onSignIn,
+  onSignOut,
+}: {
+  balance: number;
+  userEmail: string;
+  isSubmitting: boolean;
+  onSignIn: () => void;
+  onSignOut: () => void;
+}) {
   return (
     <header className="pb-nav">
       <a className="pb-brand" href="#top">
@@ -56,13 +69,19 @@ function PBNav({ balance }: { balance: number }) {
         <a href="#how">How it works</a>
       </nav>
       <div className="pb-nav-right">
+        {userEmail ? <span className="pb-nav-user">{userEmail}</span> : null}
         <div className="pb-balance" title="Your combined miles & points">
           <span className="pb-balance-label">Your balance</span>
           <span className="pb-balance-num">{fmt(balance)}</span>
           <span className="pb-balance-unit">pts</span>
         </div>
-        <button type="button" className="pb-btn pb-btn-ghost">
-          Sign in
+        <button
+          type="button"
+          className="pb-btn pb-btn-ghost"
+          disabled={isSubmitting}
+          onClick={userEmail ? onSignOut : onSignIn}
+        >
+          {userEmail ? "Sign out" : "Sign in"}
         </button>
       </div>
     </header>
@@ -487,6 +506,7 @@ function PBFooter() {
 }
 
 export default function VariantA() {
+  const auth = useAuth();
   const [selectedId, setSelectedId] = useState("maldives");
   const [balance, setBalance] = useState(186400);
   const dest = DESTINATIONS.find((d) => d.id === selectedId) ?? DESTINATIONS[0];
@@ -502,7 +522,13 @@ export default function VariantA() {
 
   return (
     <div id="top" className="pb-app">
-      <PBNav balance={balance} />
+      <PBNav
+        balance={balance}
+        userEmail={auth.userEmail}
+        isSubmitting={auth.isSubmitting}
+        onSignIn={() => auth.openAuthModal("sign-in")}
+        onSignOut={auth.handleSignOut}
+      />
       <PBHero selectedId={selectedId} onSelect={onSelect} balance={balance} onBalanceChange={setBalance} />
       <section className="pb-compare" id="compare">
         <div className="pb-compare-head">
@@ -515,6 +541,7 @@ export default function VariantA() {
       </section>
       <PBHow />
       <PBFooter />
+      {auth.isAuthOpen ? <AuthModal {...auth} /> : null}
     </div>
   );
 }
