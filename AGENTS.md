@@ -50,6 +50,7 @@ CSS layering mirrors the original bundle: every variant loads `variant-a.css` (b
 User activity is logged to Supabase as an append-only `events` stream plus normalized projection tables. **Full reference: [`docs/ANALYTICS.md`](docs/ANALYTICS.md).** The essentials:
 
 - **Schema:** `supabase/migrations/0001_analytics.sql` (run in Supabase). Tables: `visitors`, `sessions`, `events`, `feedback_submissions`, `email_subscriptions`, `contact_messages`, `donations`, `chat_messages`. RLS is locked down — writes happen only via the service-role key.
+- **Migrations rule:** ALL database changes go in `supabase/migrations/` as a **new, sequentially-numbered file** (`0002_*.sql`, `0003_*.sql`, …) — never edit an already-applied migration (e.g. `0001_analytics.sql`). One migration per logical change, named `NNNN_short_description.sql`, applied in order in Supabase.
 - **Client:** `lib/analytics/` — call `track(EVENTS.X, { ... })` (or a typed helper like `trackCardAdded`, `trackGate`, `trackFeedback`) from any client component. `AnalyticsProvider` (mounted in `app/layout.tsx`) auto-captures page views, scroll depth, time-on-page, and visitor→user linking.
 - **Ingest:** `app/api/track/route.ts` (Node runtime) batches in via `navigator.sendBeacon`/`fetch`, writes with `lib/supabase/admin.ts` (service role). Needs `SUPABASE_SERVICE_ROLE_KEY` or `STORAGE_SUPABASE_SERVICE_ROLE_KEY`.
 - **Identity:** durable `pb_vid` cookie minted in `lib/supabase/proxy.ts`; per-tab `pb_sid` session.

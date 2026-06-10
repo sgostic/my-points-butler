@@ -10,7 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { resolveVariant } from "@/components/pages";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { ensureSession, flush, setVariant, track } from "./client";
+import { ensureSession, flush, registerVisit, setVariant, track } from "./client";
 import { EVENTS } from "./events";
 
 const SCROLL_THRESHOLDS = [25, 50, 75, 100] as const;
@@ -42,6 +42,16 @@ export function AnalyticsProvider({
         userAgent:
           typeof navigator !== "undefined" ? navigator.userAgent : undefined,
       });
+      // A new session for a visitor we've stored before = a return visit.
+      const visit = registerVisit();
+      if (visit.returning) {
+        track(EVENTS.RETURNING_VISITOR, {
+          variant,
+          visitorId: visit.visitorId,
+          visitCount: visit.visitCount,
+          daysSinceLastVisit: visit.daysSinceLastVisit,
+        });
+      }
     }
     track(EVENTS.PAGE_VIEW, { variant });
     // Intentionally run once per mount; variant changes within the SPA are

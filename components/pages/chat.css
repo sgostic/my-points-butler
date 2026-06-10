@@ -37,7 +37,7 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--now);
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
   box-shadow: 0 0 0 3px rgba(249, 106, 80, 0.24);
   animation: pb-lp 2s infinite;
 }
@@ -74,7 +74,7 @@
   align-items: center;
   gap: 12px;
   padding: 15px 16px;
-  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  background: var(--brand);
   color: #fff;
 }
 .pb-chat-ava {
@@ -105,7 +105,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--now);
+  background: var(--brand);
   box-shadow: 0 0 0 3px rgba(249, 106, 80, 0.24);
 }
 .pb-chat-min {
@@ -150,7 +150,7 @@
   box-shadow: var(--shadow-sm);
 }
 .pb-me {
-  background: var(--brand);
+  background: var(--now);
   color: #fff;
   border-bottom-right-radius: 5px;
   align-self: flex-end;
@@ -235,7 +235,7 @@
   height: 42px;
   border: none;
   border-radius: 12px;
-  background: var(--brand);
+  background: var(--now);
   color: #fff;
   cursor: pointer;
   display: grid;

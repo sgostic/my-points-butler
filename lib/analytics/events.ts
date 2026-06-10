@@ -10,6 +10,7 @@ export const EVENTS = {
   PAGE_VIEW: "page_view",
   SESSION_START: "session_start",
   SESSION_END: "session_end",
+  RETURNING_VISITOR: "returning_visitor",
   SCROLL_DEPTH: "scroll_depth",
   CTA_CLICKED: "cta_clicked",
   VARIANT_SWITCHED: "variant_switched",

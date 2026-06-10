@@ -5,6 +5,8 @@ export {
   setVariant,
   getSessionId,
   ensureSession,
+  registerVisit,
+  type VisitorRecord,
   trackPointsEntered,
   trackPointsEnteredDebounced,
   trackCardAdded,

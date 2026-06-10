@@ -61,6 +61,90 @@ export function ensureSession(): { sessionId: string; isNew: boolean } {
   return { sessionId, isNew: true };
 }
 
+/* Durable, cross-session visitor record kept in localStorage. Survives tab
+   closes and browser restarts (unlike the per-tab `pb_sid`), so it lets us
+   tell a first-ever visit apart from a returning one. The `id` is a random
+   identifier minted once and reused on every later visit — seeded from the
+   `pb_vid_pub` cookie when present so the client and server agree on identity. */
+const VISITOR_STORE_KEY = "pb_visitor";
+
+export interface VisitorRecord {
+  id: string;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  visitCount: number;
+}
+
+function readVisitorRecord(): VisitorRecord | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(VISITOR_STORE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<VisitorRecord>;
+    if (typeof parsed.id !== "string" || typeof parsed.visitCount !== "number") {
+      return null;
+    }
+    return parsed as VisitorRecord;
+  } catch {
+    return null;
+  }
+}
+
+/* Record a visit and report whether this visitor has been here before. Call
+   once per session (when a new `pb_sid` is minted). On the first ever visit it
+   seeds the durable record; on later visits it bumps `visitCount`/`lastSeenAt`
+   and reports `returning: true`. */
+export function registerVisit(): {
+  returning: boolean;
+  visitCount: number;
+  visitorId: string;
+  daysSinceLastVisit: number | null;
+} {
+  const now = new Date();
+  const fallback = {
+    returning: false,
+    visitCount: 1,
+    visitorId: getVisitorId() ?? "",
+    daysSinceLastVisit: null,
+  };
+  if (typeof window === "undefined") return fallback;
+
+  const existing = readVisitorRecord();
+  if (!existing) {
+    const record: VisitorRecord = {
+      id: getVisitorId() ?? crypto.randomUUID(),
+      firstSeenAt: now.toISOString(),
+      lastSeenAt: now.toISOString(),
+      visitCount: 1,
+    };
+    try {
+      window.localStorage.setItem(VISITOR_STORE_KEY, JSON.stringify(record));
+    } catch {
+      // storage unavailable (private mode / quota) — treat as first visit
+    }
+    return { ...fallback, visitorId: record.id };
+  }
+
+  const daysSinceLastVisit =
+    (now.getTime() - new Date(existing.lastSeenAt).getTime()) / 86_400_000;
+  const updated: VisitorRecord = {
+    ...existing,
+    lastSeenAt: now.toISOString(),
+    visitCount: existing.visitCount + 1,
+  };
+  try {
+    window.localStorage.setItem(VISITOR_STORE_KEY, JSON.stringify(updated));
+  } catch {
+    // best-effort
+  }
+  return {
+    returning: true,
+    visitCount: updated.visitCount,
+    visitorId: updated.id,
+    daysSinceLastVisit: Math.round(daysSinceLastVisit * 10) / 10,
+  };
+}
+
 function buildContext(): TrackContext {
   if (cachedContext) return cachedContext;
   if (typeof window === "undefined") {
