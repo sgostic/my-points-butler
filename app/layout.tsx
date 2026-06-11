@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { Suspense } from "react";
 import { AnalyticsProvider } from "@/lib/analytics";
 import { getSiteUrl } from "@/lib/supabase/config";
@@ -78,6 +79,7 @@ export default function RootLayout({
           <AnalyticsProvider>{children}</AnalyticsProvider>
         </Suspense>
       </body>
+      <GoogleAnalytics gaId="G-YP29V4JV9B" />
     </html>
   );
 }
