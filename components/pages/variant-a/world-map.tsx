@@ -3,7 +3,7 @@
 /* WorldMap — equirectangular dotted map rendered to canvas, with projected
    destination pins as absolutely-positioned HTML (clickable, animatable). */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 interface PinnedDestination {
   id: string;
@@ -20,6 +20,7 @@ interface WorldMapProps {
   destinations: PinnedDestination[];
   selectedId: string;
   onSelect: (id: string) => void;
+  onCustomDestination?: (place: string) => void;
   dotColor?: string;
   hidden?: boolean;
 }
@@ -94,10 +95,20 @@ function pbProject(lon: number, lat: number) {
   return { x, y };
 }
 
-export function WorldMap({ destinations, selectedId, onSelect, dotColor, hidden }: WorldMapProps) {
+export function WorldMap({
+  destinations,
+  selectedId,
+  onSelect,
+  onCustomDestination,
+  dotColor,
+  hidden,
+}: WorldMapProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const customDestinationId = useId();
   const [size, setSize] = useState({ w: 0, h: 0 });
+  const [customDestination, setCustomDestination] = useState("");
+  const [requestedDestination, setRequestedDestination] = useState("");
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -141,43 +152,80 @@ export function WorldMap({ destinations, selectedId, onSelect, dotColor, hidden 
     ctx.globalAlpha = 1;
   }, [size, dotColor]);
 
+  function onCustomSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const nextDestination = customDestination.trim();
+    if (!nextDestination) return;
+    setRequestedDestination(nextDestination);
+    setCustomDestination("");
+    onCustomDestination?.(nextDestination);
+  }
+
   return (
-    <div ref={wrapRef} className="pb-map" aria-hidden={hidden ? "true" : "false"}>
-      <canvas ref={canvasRef} className="pb-map-canvas" />
-      {size.w > 0 &&
-        destinations.map((d) => {
-          const p = pbProject(d.lon, d.lat);
-          const active = d.id === selectedId;
-          // Flip the label below the pin when it sits near the top edge, and
-          // pull it inward at the left/right edges, so it never spills out.
-          const labelBelow = p.y < 0.16;
-          const labelSide = p.x < 0.1 ? " label-right" : p.x > 0.9 ? " label-left" : "";
-          return (
-            <button
-              key={d.id}
-              type="button"
-              className={
-                "pb-pin" + (active ? " is-active" : "") + (labelBelow ? " label-below" : "") + labelSide
-              }
-              style={
-                {
-                  left: p.x * 100 + "%",
-                  top: p.y * 100 + "%",
-                  "--pin": d.pinColor || d.accent,
-                } as React.CSSProperties
-              }
-              onClick={() => onSelect(d.id)}
-              aria-label={d.city + ", " + d.country}
-              aria-pressed={active}
-            >
-              <span className="pb-pin-dot" />
-              <span className="pb-pin-pulse" />
-              <span className="pb-pin-label">
-                {d.flag} {d.city}
-              </span>
-            </button>
-          );
-        })}
-    </div>
+    <>
+      <div ref={wrapRef} className="pb-map" aria-hidden={hidden ? "true" : "false"}>
+        <canvas ref={canvasRef} className="pb-map-canvas" />
+        {size.w > 0 &&
+          destinations.map((d) => {
+            const p = pbProject(d.lon, d.lat);
+            const active = d.id === selectedId;
+            // Flip the label below the pin when it sits near the top edge, and
+            // pull it inward at the left/right edges, so it never spills out.
+            const labelBelow = p.y < 0.16;
+            const labelSide = p.x < 0.1 ? " label-right" : p.x > 0.9 ? " label-left" : "";
+            return (
+              <button
+                key={d.id}
+                type="button"
+                className={
+                  "pb-pin" + (active ? " is-active" : "") + (labelBelow ? " label-below" : "") + labelSide
+                }
+                style={
+                  {
+                    left: p.x * 100 + "%",
+                    top: p.y * 100 + "%",
+                    "--pin": d.pinColor || d.accent,
+                  } as React.CSSProperties
+                }
+                onClick={() => onSelect(d.id)}
+                aria-label={d.city + ", " + d.country}
+                aria-pressed={active}
+              >
+                <span className="pb-pin-dot" />
+                <span className="pb-pin-pulse" />
+                <span className="pb-pin-label">
+                  {d.flag} {d.city}
+                </span>
+              </button>
+            );
+          })}
+      </div>
+      <form className="pb-map-request" onSubmit={onCustomSubmit}>
+        <label className="pb-map-request-label" htmlFor={customDestinationId}>
+          Dream destination not on the map?
+          <span>Tell us where you want to go next.</span>
+        </label>
+        <div className="pb-map-request-row">
+          <input
+            id={customDestinationId}
+            className="pb-map-request-input"
+            type="text"
+            value={customDestination}
+            onChange={(event) => setCustomDestination(event.target.value)}
+            placeholder="City or place"
+            maxLength={80}
+            autoComplete="address-level2"
+          />
+          <button className="pb-map-request-btn" type="submit">
+            Add
+          </button>
+        </div>
+        {requestedDestination && (
+          <p className="pb-map-request-note" aria-live="polite">
+            Using {requestedDestination} for this plan.
+          </p>
+        )}
+      </form>
+    </>
   );
 }

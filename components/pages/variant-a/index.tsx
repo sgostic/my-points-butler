@@ -7,6 +7,8 @@
 import { useEffect, useState } from "react";
 import {
   DESTINATIONS,
+  findDestinationByQuery,
+  makeCustomDestination,
   summarize,
   verdictFor,
   fmt,
@@ -450,47 +452,72 @@ function PBTable({
 function PBBalanceInput({
   balance,
   onBalanceChange,
+  onSubmit,
 }: {
   balance: number;
   onBalanceChange: (n: number) => void;
+  onSubmit: () => void;
 }) {
   return (
-    <label className="pb-balance-input">
-      <span className="pb-balance-input-label">Your points balance</span>
-      <span className="pb-balance-input-field">
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          step={1000}
-          value={Number.isFinite(balance) ? balance : 0}
-          onChange={(e) => {
-            const next = Math.max(0, Number(e.target.value) || 0);
-            onBalanceChange(next);
-            trackPointsEnteredDebounced("balance", next, "a");
-          }}
-          aria-label="Your points balance"
-        />
-        <span className="pb-balance-input-unit">pts</span>
-      </span>
+    <form
+      className="pb-balance-input"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
+      <label className="pb-balance-input-label" htmlFor="pb-hero-balance">
+        Your points balance
+      </label>
+      <div className="pb-balance-action">
+        <span className="pb-balance-input-field">
+          <input
+            id="pb-hero-balance"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={1}
+            value={Number.isFinite(balance) ? balance : 0}
+            onChange={(e) => {
+              const next = Math.max(0, Number(e.target.value) || 0);
+              onBalanceChange(next);
+              trackPointsEnteredDebounced("balance", next, "a");
+            }}
+            aria-label="Your points balance"
+          />
+          <span className="pb-balance-input-unit">pts</span>
+        </span>
+        <button className="pb-hero-cta" type="submit">
+          Build My Points Travel Plan →
+        </button>
+      </div>
       <span className="pb-balance-input-hint">We&apos;ll show what you can book now vs. what to save for.</span>
-    </label>
+    </form>
   );
 }
 
 function PBHero({
   selectedId,
+  selectedDestination,
   onSelect,
+  onCustomDestination,
   balance,
   onBalanceChange,
 }: {
   selectedId: string;
+  selectedDestination: Destination;
   onSelect: (id: string) => void;
+  onCustomDestination: (place: string) => void;
   balance: number;
   onBalanceChange: (n: number) => void;
 }) {
-  const sel = DESTINATIONS.find((d) => d.id === selectedId);
+  const sel = selectedDestination;
   const pinned = DESTINATIONS.map((d) => ({ ...d, pinColor: TONE_VAR[summarize(d).tone] }));
+  const scrollToCompare = () => {
+    const el = document.getElementById("compare");
+    if (el) window.scrollTo({ top: el.offsetTop - 12, behavior: "smooth" });
+  };
+
   return (
     <section className="pb-hero" id="explore">
       <div className="pb-hero-bg">
@@ -508,15 +535,7 @@ function PBHero({
           <p className="pb-hero-lede">
             Get guidance based on your current points, future trips, and travel goals.
           </p>
-          <a className="pb-hero-cta" href="#compare">
-            Build My Points Travel Plan →
-          </a>
-          <div className="pb-hero-chips">
-            <span className="pb-chip">✈ Flights + 🏨 hotels</span>
-            <span className="pb-chip">📉 Price forecasts</span>
-            <span className="pb-chip">🤵 Use-now vs. save verdict</span>
-          </div>
-          <PBBalanceInput balance={balance} onBalanceChange={onBalanceChange} />
+          <PBBalanceInput balance={balance} onBalanceChange={onBalanceChange} onSubmit={scrollToCompare} />
         </div>
 
         <div className="pb-map-card">
@@ -532,7 +551,13 @@ function PBHero({
               </div>
             )}
           </div>
-          <WorldMap destinations={pinned} selectedId={selectedId} onSelect={onSelect} dotColor={DOT_COLOR} />
+          <WorldMap
+            destinations={pinned}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            onCustomDestination={onCustomDestination}
+            dotColor={DOT_COLOR}
+          />
           <div className="pb-map-legend">
             <span className="pb-leg">
               <i className="dot save" /> Worth waiting
@@ -576,19 +601,34 @@ function PBHow() {
 export default function VariantA() {
   const auth = useAuth();
   const [selectedId, setSelectedId] = useState("maldives");
+  const [customDestination, setCustomDestination] = useState<Destination | null>(null);
   const [balance, setBalance] = useState(186400);
-  const dest = DESTINATIONS.find((d) => d.id === selectedId) ?? DESTINATIONS[0];
+  const selectedDestination = DESTINATIONS.find((d) => d.id === selectedId) ?? customDestination;
+  const dest = selectedDestination ?? DESTINATIONS[0];
   const summary = summarize(dest);
   const isSignedIn = Boolean(auth.userEmail);
   const openSignUp = () => auth.openAuthModal("sign-up");
 
   const onSelect = (id: string) => {
+    setCustomDestination(null);
     setSelectedId(id);
     trackMapPin(id, "select", "a");
     if (typeof window !== "undefined") {
       const el = document.getElementById("compare");
       if (el) window.scrollTo({ top: el.offsetTop - 12, behavior: "smooth" });
     }
+  };
+
+  const onCustomDestination = (place: string) => {
+    const existing = findDestinationByQuery(place);
+    if (existing) {
+      onSelect(existing.id);
+      return;
+    }
+    const next = makeCustomDestination(place, dest);
+    setCustomDestination(next);
+    setSelectedId(next.id);
+    trackMapPin(next.id, "select", "a");
   };
 
   return (
@@ -600,7 +640,14 @@ export default function VariantA() {
         onSignIn={() => auth.openAuthModal("sign-in")}
         onSignOut={auth.handleSignOut}
       />
-      <PBHero selectedId={selectedId} onSelect={onSelect} balance={balance} onBalanceChange={setBalance} />
+      <PBHero
+        selectedId={selectedId}
+        selectedDestination={dest}
+        onSelect={onSelect}
+        onCustomDestination={onCustomDestination}
+        balance={balance}
+        onBalanceChange={setBalance}
+      />
       <section className="pb-compare" id="compare">
         <div className="pb-compare-head">
           <span className="pb-eyebrow dark">Now vs. save</span>

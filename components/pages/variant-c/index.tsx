@@ -5,7 +5,13 @@
    Reuses Variant A's world map + data and the shared alerts/base styles. */
 
 import { useState } from "react";
-import { DESTINATIONS, fmt } from "../variant-a/data";
+import {
+  DESTINATIONS,
+  findDestinationByQuery,
+  makeCustomDestination,
+  fmt,
+  type Destination,
+} from "../variant-a/data";
 import { WorldMap } from "../variant-a/world-map";
 import { PBModeNav } from "../mode-nav";
 import { AuthModal, PBSignupGate, useAuth } from "../auth";
@@ -113,6 +119,10 @@ function PBGoalsEngine({
           </span>
         </div>
       </div>
+
+      <a className="pb-hero-cta pb-engine-cta" href="#goals">
+        Build My Points Travel Plan →
+      </a>
     </div>
   );
 }
@@ -239,6 +249,7 @@ function PBGoalCard({
 function PBHeroGoals({
   goalIds,
   onToggle,
+  onCustomDestination,
   current,
   spend,
   onCurrent,
@@ -247,6 +258,7 @@ function PBHeroGoals({
 }: {
   goalIds: string[];
   onToggle: (id: string) => void;
+  onCustomDestination: (place: string) => void;
   current: number;
   spend: number;
   onCurrent: (n: number) => void;
@@ -272,9 +284,6 @@ function PBHeroGoals({
           <p className="pb-hero-lede">
             Build a points strategy around the trips you actually want to take.
           </p>
-          <a className="pb-hero-cta" href="#goals">
-            Build My Points Travel Plan →
-          </a>
         </div>
         <div className="pb-hero-grid">
           <PBGoalsEngine
@@ -291,7 +300,13 @@ function PBHeroGoals({
                 <div className="pb-map-card-sub">Tap to track · tap again to drop</div>
               </div>
             </div>
-            <WorldMap destinations={pinned} selectedId="" onSelect={onToggle} dotColor={DOT_COLOR} />
+            <WorldMap
+              destinations={pinned}
+              selectedId=""
+              onSelect={onToggle}
+              onCustomDestination={onCustomDestination}
+              dotColor={DOT_COLOR}
+            />
             <div className="pb-map-legend">
               <span className="pb-leg">
                 <i className="dot save" /> Tracking
@@ -400,13 +415,15 @@ function PBHowGoals() {
 export default function VariantC() {
   const auth = useAuth();
   const [goalIds, setGoalIds] = useState(DEFAULT_GOALS);
+  const [customDestinations, setCustomDestinations] = useState<Destination[]>([]);
   const [current, setCurrent] = useState(206000);
   const [spend, setSpend] = useState(12000);
   const isSignedIn = Boolean(auth.userEmail);
   const openSignUp = () => auth.openAuthModal("sign-up");
+  const allDestinations = [...customDestinations, ...DESTINATIONS];
 
   const goals = goalIds
-    .map((id) => ({ id, dest: DESTINATIONS.find((d) => d.id === id) }))
+    .map((id) => ({ id, dest: allDestinations.find((d) => d.id === id) }))
     .filter((g): g is { id: string; dest: (typeof DESTINATIONS)[number] } => Boolean(g.dest));
   const plans = pbPlanGoals(goals, current, earnFromSpend(spend));
 
@@ -424,6 +441,31 @@ export default function VariantC() {
     if (typeof window !== "undefined") {
       setTimeout(() => {
         const el = document.getElementById("goal-" + id) || document.getElementById("goals");
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top, behavior: "smooth" });
+        }
+      }, 60);
+    }
+  };
+  const onCustomDestination = (place: string) => {
+    const existing = findDestinationByQuery(place);
+    if (existing) {
+      onToggle(existing.id);
+      return;
+    }
+    const next = makeCustomDestination(place, DESTINATIONS.find((d) => d.id === "maldives") ?? DESTINATIONS[0]);
+    setCustomDestinations((destinations) =>
+      destinations.some((destination) => destination.id === next.id) ? destinations : [next, ...destinations],
+    );
+    if (!goalIds.includes(next.id)) {
+      trackMapPin(next.id, "toggle", "c");
+      track(EVENTS.GOAL_ADDED, { destId: next.id, totalGoals: goalIds.length + 1 });
+      setGoalIds((ids) => [next.id, ...ids]);
+    }
+    if (typeof window !== "undefined") {
+      setTimeout(() => {
+        const el = document.getElementById("goals");
         if (el) {
           const top = el.getBoundingClientRect().top + window.scrollY - 80;
           window.scrollTo({ top, behavior: "smooth" });
@@ -464,6 +506,7 @@ export default function VariantC() {
       <PBHeroGoals
         goalIds={goalIds}
         onToggle={onToggle}
+        onCustomDestination={onCustomDestination}
         current={current}
         spend={spend}
         onCurrent={setCurrent}

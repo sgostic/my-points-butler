@@ -105,7 +105,7 @@ function PBTasteBar({
             }
           }}
         >
-          Show options
+          Build My Points Travel Plan →
         </button>
         <button
           type="button"
@@ -534,9 +534,6 @@ export default function VariantD() {
             <p className="pb-hero-lede">
               Discover destinations that match your rewards wallet and travel preferences.
             </p>
-            <a className="pb-hero-cta" href="#discover">
-              Build My Points Travel Plan →
-            </a>
           </div>
           <div className="pb-hero-single">
             <PBTasteBar

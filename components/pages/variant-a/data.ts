@@ -48,6 +48,21 @@ export interface Summary {
   tone: Tone;
 }
 
+export function normalizeDestinationQuery(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+export function customDestinationId(value: string) {
+  const normalized = normalizeDestinationQuery(value).replace(/\s+/g, "-");
+  return `custom-${normalized || "destination"}`;
+}
+
 // lat/lon used to project pins onto the equirectangular dotted map.
 const BASE_DESTINATIONS: Omit<Destination, "tags" | "nights" | "vibe">[] = [
   {
@@ -516,6 +531,30 @@ export const DESTINATIONS: Destination[] = BASE_DESTINATIONS.map((d) => ({
   nights: NIGHTS[d.id] ?? 4,
   vibe: VIBES[d.id] ?? "",
 }));
+
+export function findDestinationByQuery(place: string) {
+  const query = normalizeDestinationQuery(place);
+  return DESTINATIONS.find((d) => {
+    const city = normalizeDestinationQuery(d.city);
+    const country = normalizeDestinationQuery(d.country);
+    return query === city || query === country || query === `${city} ${country}`;
+  });
+}
+
+export function makeCustomDestination(place: string, template: Destination): Destination {
+  const city = place.trim();
+  return {
+    ...template,
+    id: customDestinationId(city),
+    city,
+    country: "Custom trip",
+    flag: "📍",
+    lat: template.lat,
+    lon: template.lon,
+    blurb: `Using comparable award patterns for ${city} until live route data is available.`,
+    vibe: `A custom dream trip to ${city}.`,
+  };
+}
 
 export const INTERESTS = ["Beaches", "Cities", "Culture", "Food", "Nature", "Adventure", "Wellness", "Nightlife"];
 

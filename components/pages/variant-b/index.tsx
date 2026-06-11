@@ -6,7 +6,14 @@
    balance and ping you when one drops into range. */
 
 import { useState } from "react";
-import { DESTINATIONS, summarize, fmt, type Destination } from "../variant-a/data";
+import {
+  DESTINATIONS,
+  findDestinationByQuery,
+  makeCustomDestination,
+  summarize,
+  fmt,
+  type Destination,
+} from "../variant-a/data";
 import { WorldMap } from "../variant-a/world-map";
 import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
@@ -233,18 +240,22 @@ function PBWalletBuilder({
 /* ---------- Hero ---------- */
 function PBHeroAlerts({
   selectedId,
+  selectedDestination,
   onSelect,
+  onCustomDestination,
   wallet,
   onAdd,
   onRemove,
 }: {
   selectedId: string;
+  selectedDestination: Destination;
   onSelect: (id: string) => void;
+  onCustomDestination: (place: string) => void;
   wallet: WalletEntry[];
   onAdd: (entry: WalletEntry) => void;
   onRemove: (id: number) => void;
 }) {
-  const sel = DESTINATIONS.find((d) => d.id === selectedId);
+  const sel = selectedDestination;
   const pinned = DESTINATIONS.map((d) => ({ ...d, pinColor: TONE_VAR[summarize(d).tone] }));
   return (
     <section className="pb-hero pb-hero-alerts" id="explore">
@@ -280,7 +291,13 @@ function PBHeroAlerts({
                 </div>
               )}
             </div>
-            <WorldMap destinations={pinned} selectedId={selectedId} onSelect={onSelect} dotColor={DOT_COLOR} />
+            <WorldMap
+              destinations={pinned}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              onCustomDestination={onCustomDestination}
+              dotColor={DOT_COLOR}
+            />
             <div className="pb-map-legend">
               <span className="pb-leg">
                 <i className="dot save" /> Fits now
@@ -688,20 +705,34 @@ function PBHowAlerts() {
 export default function VariantB() {
   const auth = useAuth();
   const [selectedId, setSelectedId] = useState("maldives");
+  const [customDestination, setCustomDestination] = useState<Destination | null>(null);
   const [wallet, setWallet] = useState<WalletEntry[]>(DEFAULT_WALLET);
-  const dest = DESTINATIONS.find((d) => d.id === selectedId) ?? DESTINATIONS[0];
+  const selectedDestination = DESTINATIONS.find((d) => d.id === selectedId) ?? customDestination;
+  const dest = selectedDestination ?? DESTINATIONS[0];
   const pools = pbPools(wallet);
   const ws = pbWalletSummary(dest, pools);
   const isSignedIn = Boolean(auth.userEmail);
   const openSignUp = () => auth.openAuthModal("sign-up");
 
   const onSelect = (id: string) => {
+    setCustomDestination(null);
     setSelectedId(id);
     trackMapPin(id, "select", "b");
     if (typeof window !== "undefined") {
       const el = document.getElementById("match");
       if (el) window.scrollTo({ top: el.offsetTop - 12, behavior: "smooth" });
     }
+  };
+  const onCustomDestination = (place: string) => {
+    const existing = findDestinationByQuery(place);
+    if (existing) {
+      onSelect(existing.id);
+      return;
+    }
+    const next = makeCustomDestination(place, dest);
+    setCustomDestination(next);
+    setSelectedId(next.id);
+    trackMapPin(next.id, "select", "b");
   };
   const onAdd = (entry: WalletEntry) => setWallet((w) => [...w, entry]);
   const onRemove = (id: number) => setWallet((w) => w.filter((x) => x.id !== id));
@@ -717,7 +748,9 @@ export default function VariantB() {
       />
       <PBHeroAlerts
         selectedId={selectedId}
+        selectedDestination={dest}
         onSelect={onSelect}
+        onCustomDestination={onCustomDestination}
         wallet={wallet}
         onAdd={onAdd}
         onRemove={onRemove}

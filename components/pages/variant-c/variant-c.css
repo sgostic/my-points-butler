@@ -20,6 +20,7 @@
 .pb-eng-stats { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; margin-top: 10px; font-size: 13px; color: var(--muted); }
 .pb-eng-stats strong { font-family: var(--font-num); color: var(--ink); }
 .pb-eng-eta { font-weight: 700; color: var(--save-deep); }
+.pb-engine-cta { margin-top: 18px; }
 
 /* ---------- Goals list ---------- */
 .pb-goals-list { display: flex; flex-direction: column; gap: 16px; }

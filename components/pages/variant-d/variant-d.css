@@ -23,8 +23,9 @@
 .pb-fits.is-on { border-color: color-mix(in srgb, var(--save) 40%, #fff); color: var(--save-deep); background: color-mix(in srgb, var(--save) 9%, #fff); }
 .pb-fits.is-on .pb-fits-dot { background: var(--save); border-color: var(--save); box-shadow: inset 0 0 0 2px #fff; }
 .pb-show-options { font-family: var(--font-body); font-weight: 700; font-size: 14px; color: #fff;
-  background: var(--save); border: 0; border-radius: 12px; padding: 12px 20px; cursor: pointer; transition: all .15s; }
-.pb-show-options:hover { background: var(--save-deep); }
+  background: #F96A50; border: 0; border-radius: 12px; padding: 12px 20px; cursor: pointer;
+  box-shadow: 0 14px 34px rgba(249,106,80,.26); transition: transform .12s ease, filter .15s ease; }
+.pb-show-options:hover { filter: brightness(1.04); transform: translateY(-1px); }
 .pb-show-options:active { transform: translateY(1px); }
 .pb-taste-count { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--muted); }
 
