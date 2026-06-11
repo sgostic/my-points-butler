@@ -148,15 +148,11 @@ function PBVerdict({
   summary,
   framing,
   balance,
-  isSignedIn,
-  onSignUp,
 }: {
   dest: Destination;
   summary: Summary;
   framing: number;
   balance: number;
-  isSignedIn: boolean;
-  onSignUp: () => void;
 }) {
   const [feedback, setFeedback] = useState(false);
   const best = summary.best;
@@ -202,13 +198,7 @@ function PBVerdict({
       : "miles you'd keep by waiting";
   const badgeLabel = tone === "now" ? "Book now" : tone === "neutral" ? "Roughly even" : "Wait & save";
   const arrow = tone === "now" ? "↑" : "↓";
-  const ctaLabel = !isSignedIn
-    ? "Sign up to save this verdict →"
-    : tone === "now"
-    ? `Book ${best.o.name} now →`
-    : tone === "neutral"
-    ? `Use my points on ${dest.city} →`
-    : `Remind me to book ${dest.city} →`;
+  const ctaLabel = "Alert me when it's time to book →";
 
   return (
     <div className={"pb-verdict-card tone-" + tone} style={{ "--accent": dest.accent } as React.CSSProperties}>
@@ -264,21 +254,17 @@ function PBVerdict({
         )}
         <button
           type="button"
-          className={"pb-vc-cta" + (isSignedIn ? "" : " pb-gated-action")}
-          onClick={() => {
-            if (isSignedIn) {
-              setFeedback(true);
-            } else {
-              trackGate("verdict", "a");
-              onSignUp();
-            }
-          }}
+          className="pb-vc-cta"
+          onClick={() => setFeedback(true)}
         >
           {ctaLabel}
         </button>
       </div>
       {feedback && (
-        <PBFeedbackModal context={`${best.o.name} · ${dest.city}`} onClose={() => setFeedback(false)} />
+        <PBFeedbackModal
+          context={`${best.o.name} · ${dest.city} booking alert`}
+          onClose={() => setFeedback(false)}
+        />
       )}
     </div>
   );
@@ -659,8 +645,6 @@ export default function VariantA() {
           summary={summary}
           framing={FRAMING}
           balance={balance}
-          isSignedIn={isSignedIn}
-          onSignUp={openSignUp}
         />
         <PBTable dest={dest} balance={balance} isSignedIn={isSignedIn} onSignUp={openSignUp} />
       </section>

@@ -319,16 +319,9 @@ function PBDealModal({
             <button
               type="button"
               className="pb-modal-book"
-              onClick={() => {
-                if (isSignedIn) {
-                  setFeedback(true);
-                } else {
-                  trackGate("deal_modal", "d");
-                  onSignUp();
-                }
-              }}
+              onClick={() => setFeedback(true)}
             >
-              {isSignedIn ? `Book with ${fmt(cost)} pts →` : "Sign up to save this deal →"}
+              {isSignedIn ? `Book with ${fmt(cost)} pts →` : "Get this deal →"}
             </button>
           ) : !isSignedIn ? (
             <button
@@ -352,7 +345,7 @@ function PBDealModal({
         </div>
       </div>
       {feedback && (
-        <PBFeedbackModal context={`Book ${d.city}`} onClose={() => setFeedback(false)} />
+        <PBFeedbackModal context={`Get ${d.city} deal`} onClose={() => setFeedback(false)} />
       )}
     </div>
   );

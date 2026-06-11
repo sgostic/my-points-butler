@@ -394,13 +394,11 @@ function PBAlertCTA({
   pools,
   ws,
   isSignedIn,
-  onSignUp,
 }: {
   dest: Destination;
   pools: Pools;
   ws: WalletSummary;
   isSignedIn: boolean;
-  onSignUp: () => void;
 }) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -430,12 +428,9 @@ function PBAlertCTA({
           <button
             type="button"
             className="pb-al-btn pb-al-btn-full"
-            onClick={() => {
-              trackGate("alert_gate", "b");
-              onSignUp();
-            }}
+            onClick={() => setFeedback(true)}
           >
-            Sign up to create alert
+            Alert me when it&apos;s bookable
           </button>
           <div className="pb-al-meta">
             <span className="pb-al-trigger">
@@ -491,7 +486,10 @@ function PBAlertCTA({
         </div>
       )}
       {feedback && (
-        <PBFeedbackModal context={`${dest.city} deal alert`} onClose={() => setFeedback(false)} />
+        <PBFeedbackModal
+          context={`${dest.city} deal alert signup`}
+          onClose={() => setFeedback(false)}
+        />
       )}
     </div>
   );
@@ -502,13 +500,11 @@ function PBMatchCard({
   pools,
   ws,
   isSignedIn,
-  onSignUp,
 }: {
   dest: Destination;
   pools: Pools;
   ws: WalletSummary;
   isSignedIn: boolean;
-  onSignUp: () => void;
 }) {
   return (
     <div
@@ -520,7 +516,7 @@ function PBMatchCard({
     >
       <PBMatchSummary dest={dest} ws={ws} />
       <div className="pb-vc-right pb-al-wrap">
-        <PBAlertCTA dest={dest} pools={pools} ws={ws} isSignedIn={isSignedIn} onSignUp={onSignUp} />
+        <PBAlertCTA dest={dest} pools={pools} ws={ws} isSignedIn={isSignedIn} />
       </div>
     </div>
   );
@@ -761,7 +757,7 @@ export default function VariantB() {
           <h2 className="pb-h2">What your points actually unlock in {dest.city}.</h2>
           <p className="pb-compare-lede">{dest.blurb}</p>
         </div>
-        <PBMatchCard dest={dest} pools={pools} ws={ws} isSignedIn={isSignedIn} onSignUp={openSignUp} />
+        <PBMatchCard dest={dest} pools={pools} ws={ws} isSignedIn={isSignedIn} />
         <PBMatchTable dest={dest} pools={pools} isSignedIn={isSignedIn} onSignUp={openSignUp} />
       </section>
       <PBHowAlerts />
