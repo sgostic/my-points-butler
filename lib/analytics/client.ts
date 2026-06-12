@@ -318,6 +318,10 @@ export function trackFeedback(props: {
   }
 }
 
+export function trackCta(label: string, variant?: VariantKey, context?: string) {
+  track(EVENTS.CTA_CLICKED, { label, variant, context });
+}
+
 // --- Ready for features that don't exist yet (just call these once built) ---
 
 export function trackShare(method: string, variant?: VariantKey) {

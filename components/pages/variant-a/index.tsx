@@ -26,6 +26,7 @@ import { PBShareButton } from "../share-button";
 import {
   EVENTS,
   track,
+  trackCta,
   trackGate,
   trackMapPin,
   trackPointsEnteredDebounced,
@@ -492,6 +493,7 @@ function PBHero({
   const sel = selectedDestination;
   const pinned = DESTINATIONS.map((d) => ({ ...d, pinColor: TONE_VAR[summarize(d).tone] }));
   const scrollToCompare = () => {
+    trackCta("build_plan", "a");
     const el = document.getElementById("compare");
     if (el) window.scrollTo({ top: el.offsetTop - 12, behavior: "smooth" });
   };

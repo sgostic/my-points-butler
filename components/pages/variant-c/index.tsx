@@ -21,6 +21,7 @@ import { pbEta, pbPlanGoals, type GoalPlan } from "./goals";
 import {
   EVENTS,
   track,
+  trackCta,
   trackMapPin,
   trackPointsEnteredDebounced,
 } from "@/lib/analytics";
@@ -120,9 +121,16 @@ function PBGoalsEngine({
         </div>
       </div>
 
-      <a className="pb-hero-cta pb-engine-cta" href="#goals">
+      <button
+        type="button"
+        className="pb-hero-cta pb-engine-cta"
+        onClick={() => {
+          trackCta("build_plan", "c");
+          document.getElementById("goals")?.scrollIntoView({ behavior: "smooth" });
+        }}
+      >
         Build My Points Travel Plan →
-      </a>
+      </button>
     </div>
   );
 }

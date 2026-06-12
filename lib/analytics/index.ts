@@ -14,6 +14,7 @@ export {
   trackMapPin,
   trackGate,
   trackFeedback,
+  trackCta,
   trackShare,
   trackSubscribe,
   trackContact,

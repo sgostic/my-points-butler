@@ -25,6 +25,7 @@ import {
   track,
   trackCardAdded,
   trackCardRemoved,
+  trackCta,
   trackGate,
   trackMapPin,
   trackSubscribe,
@@ -401,6 +402,7 @@ function PBAlertCTA({
   // The alert isn't really wired to a backend — confirm the (mock) success and
   // prompt the tester for feedback.
   const setAlert = () => {
+    trackCta("set_alert", "b", dest.id);
     track(EVENTS.ALERT_CREATED, { destId: dest.id, email, watching });
     if (valid) trackSubscribe(email, "alert_cta", "b");
     setSent(true);

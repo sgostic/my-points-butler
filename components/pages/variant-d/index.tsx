@@ -21,6 +21,7 @@ import { PBFooter } from "../footer";
 import {
   EVENTS,
   track,
+  trackCta,
   trackGate,
   trackPointsEnteredDebounced,
 } from "@/lib/analytics";
@@ -98,6 +99,7 @@ function PBTasteBar({
           type="button"
           className="pb-show-options"
           onClick={() => {
+            trackCta("build_plan", "d");
             const el = document.getElementById("discover");
             if (el) {
               const top = el.getBoundingClientRect().top + window.scrollY - 80;
