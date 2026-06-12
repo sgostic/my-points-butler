@@ -68,22 +68,29 @@ function applyStickyVariant(request: NextRequest, response: NextResponse) {
   const storedVariant = asVariant(request.cookies.get(VARIANT_COOKIE)?.value);
   const requestedVariant = asVariant(request.nextUrl.searchParams.get("variant"));
 
-  if (!storedVariant) {
-    setVariantCookie(response, requestedVariant ?? DEFAULT_VARIANT);
+  // An explicit, valid ?variant always wins and (re)writes the remembered
+  // variant — so manually visiting another variant overwrites the first one.
+  if (requestedVariant) {
+    if (requestedVariant !== storedVariant) {
+      setVariantCookie(response, requestedVariant);
+    }
     return response;
   }
 
-  if (request.nextUrl.searchParams.has("variant")) {
-    return response;
+  // No explicit variant: send returning visitors back to the one they first saw.
+  if (storedVariant) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.searchParams.set("variant", storedVariant);
+
+    const redirectResponse = NextResponse.redirect(redirectUrl);
+    copyResponseCookies(response, redirectResponse);
+    setVariantCookie(redirectResponse, storedVariant);
+    return redirectResponse;
   }
 
-  const redirectUrl = request.nextUrl.clone();
-  redirectUrl.searchParams.set("variant", storedVariant);
-
-  const redirectResponse = NextResponse.redirect(redirectUrl);
-  copyResponseCookies(response, redirectResponse);
-  setVariantCookie(redirectResponse, storedVariant);
-  return redirectResponse;
+  // First-ever visit with no variant chosen: remember the default.
+  setVariantCookie(response, DEFAULT_VARIANT);
+  return response;
 }
 
 export async function updateSession(request: NextRequest) {
