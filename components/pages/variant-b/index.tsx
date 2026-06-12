@@ -5,7 +5,7 @@
    turned around the wallet: tell us what you hold, we match deals to your
    balance and ping you when one drops into range. */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   DESTINATIONS,
   findDestinationByQuery,
@@ -54,11 +54,8 @@ const TONE_VAR = {
 
 const DOT_COLOR = "#C2AE9F";
 
-const DEFAULT_WALLET: WalletEntry[] = [
-  { id: 1, type: "card", program: "Amex Membership Rewards", points: 120000 },
-  { id: 2, type: "airline", program: "United MileagePlus", points: 48000 },
-  { id: 3, type: "hotel", program: "World of Hyatt", points: 38000 },
-];
+/* Wallet starts empty — the user builds it by tapping the programs they hold. */
+const WALLET_TYPES = Object.keys(PB_PROGRAMS) as WalletType[];
 
 /* ---------- Nav with planner ↔ alerts mode switch ---------- */
 function PBNavModes({
@@ -103,31 +100,53 @@ function PBNavModes({
   );
 }
 
-/* ---------- Wallet builder ---------- */
+/* ---------- Wallet builder ----------
+   Tap-to-add: every program is shown as a pill grouped by category, so it's
+   obvious you can pick several. Tapping one drops it into your balances list
+   with an inline points field; tapping again removes it. No preselected
+   defaults — the wallet starts empty and the user builds it. */
 function PBWalletBuilder({
   wallet,
   onAdd,
   onRemove,
+  onUpdate,
 }: {
   wallet: WalletEntry[];
   onAdd: (entry: WalletEntry) => void;
   onRemove: (id: number) => void;
+  onUpdate: (id: number, points: number) => void;
 }) {
-  const [type, setType] = useState<WalletType>("card");
-  const [program, setProgram] = useState(PB_PROGRAMS.card.list[0]);
-  const [amount, setAmount] = useState("");
   const pools = pbPools(wallet);
+  // Monotonic id source (avoids impure Date.now in render) + the id awaiting
+  // focus once its balance field mounts.
+  const nextId = useRef(1);
+  const pendingFocus = useRef<number | null>(null);
+  // Track each program's first real balance once, so analytics fires on a
+  // meaningful "card added" (positive points) rather than on the empty tap.
+  const tracked = useRef(new Set<string>());
 
-  const pickType = (t: WalletType) => {
-    setType(t);
-    setProgram(PB_PROGRAMS[t].list[0]);
+  const entryFor = (program: string) => wallet.find((w) => w.program === program);
+
+  const toggle = (type: WalletType, program: string) => {
+    const existing = entryFor(program);
+    if (existing) {
+      trackCardRemoved(existing.id, program, type);
+      tracked.current.delete(program);
+      onRemove(existing.id);
+    } else {
+      const id = nextId.current++;
+      pendingFocus.current = id;
+      onAdd({ id, type, program, points: 0 });
+    }
   };
-  const add = () => {
-    const pts = parseInt(String(amount).replace(/[^0-9]/g, ""), 10);
-    if (!pts || pts <= 0) return;
-    onAdd({ id: Date.now(), type, program, points: pts });
-    trackCardAdded(type, program, pts);
-    setAmount("");
+
+  const setBalance = (entry: WalletEntry, raw: string) => {
+    const pts = parseInt(raw.replace(/[^0-9]/g, ""), 10) || 0;
+    onUpdate(entry.id, pts);
+    if (pts > 0 && !tracked.current.has(entry.program)) {
+      tracked.current.add(entry.program);
+      trackCardAdded(entry.type, entry.program, pts);
+    }
   };
 
   return (
@@ -135,7 +154,7 @@ function PBWalletBuilder({
       <div className="pb-wallet-head">
         <div>
           <div className="pb-wallet-title">Your points wallet</div>
-          <div className="pb-wallet-sub">Add what you actually have — we&apos;ll match deals to it.</div>
+          <div className="pb-wallet-sub">Tap every card, airline &amp; hotel you have.</div>
         </div>
         <div className="pb-wallet-total">
           <span className="pb-wallet-total-num">{fmt(pools.total)}</span>
@@ -143,76 +162,86 @@ function PBWalletBuilder({
         </div>
       </div>
 
-      <div className="pb-wallet-form">
-        <div className="pb-seg" role="tablist" aria-label="Program type">
-          {(Object.keys(PB_PROGRAMS) as WalletType[]).map((t) => (
-            <button
-              key={t}
-              type="button"
-              role="tab"
-              aria-selected={type === t}
-              className={"pb-seg-btn" + (type === t ? " is-on" : "")}
-              onClick={() => pickType(t)}
-            >
-              <span aria-hidden="true">{PB_PROGRAMS[t].icon}</span> {PB_PROGRAMS[t].label}
-            </button>
-          ))}
-        </div>
-        <div className="pb-wallet-row">
-          <label className="pb-field pb-field-grow">
-            <span className="pb-field-label">{PB_PROGRAMS[type].label} program</span>
-            <select className="pb-select" value={program} onChange={(e) => setProgram(e.target.value)}>
-              {PB_PROGRAMS[type].list.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="pb-field">
-            <span className="pb-field-label">Points balance</span>
-            <input
-              className="pb-input"
-              inputMode="numeric"
-              placeholder="e.g. 120,000"
-              value={amount}
-              onChange={(e) =>
-                setAmount(
-                  e.target.value.replace(/[^0-9]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-                )
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") add();
-              }}
-            />
-          </label>
-          <button type="button" className="pb-add-btn" onClick={add}>
-            + Add
-          </button>
-        </div>
+      <div className="pb-picker">
+        {WALLET_TYPES.map((t) => (
+          <div className="pb-picker-group" key={t}>
+            <span className="pb-picker-label">{PB_PROGRAMS[t].label}s</span>
+            <div className="pb-picker-pills">
+              {PB_PROGRAMS[t].list.map((p) => {
+                const on = Boolean(entryFor(p));
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    aria-pressed={on}
+                    className={"pb-prog type-" + t + (on ? " is-on" : "")}
+                    onClick={() => toggle(t, p)}
+                  >
+                    <span className="pb-prog-ic" aria-hidden="true">
+                      {PB_PROGRAMS[t].icon}
+                    </span>
+                    <span className="pb-prog-name">{p}</span>
+                    <span className="pb-prog-mark" aria-hidden="true">
+                      {on ? "✓" : "+"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {wallet.length > 0 && (
-        <div className="pb-chips">
+      {wallet.length === 0 ? (
+        <div className="pb-wallet-empty">
+          <span className="pb-wallet-empty-ic" aria-hidden="true">
+            👆
+          </span>
+          <span>
+            Tap the programs you hold — add as many as you like. We&apos;ll match deals to your balance.
+          </span>
+        </div>
+      ) : (
+        <div className="pb-balances">
+          <div className="pb-balances-head">
+            Your balances <span>{wallet.length} added</span>
+          </div>
           {wallet.map((w) => (
-            <span key={w.id} className={"pb-wchip type-" + w.type}>
-              <span className="pb-wchip-ico" aria-hidden="true">
+            <div className={"pb-bal type-" + w.type} key={w.id}>
+              <span className="pb-bal-ic" aria-hidden="true">
                 {PB_PROGRAMS[w.type].icon}
               </span>
-              <span className="pb-wchip-name">{w.program}</span>
-              <span className="pb-wchip-pts">{fmt(w.points)}</span>
+              <span className="pb-bal-name">{w.program}</span>
+              <span className="pb-bal-field">
+                <input
+                  ref={(el) => {
+                    if (el && pendingFocus.current === w.id) {
+                      el.focus();
+                      pendingFocus.current = null;
+                    }
+                  }}
+                  className="pb-bal-input"
+                  inputMode="numeric"
+                  aria-label={w.program + " points balance"}
+                  placeholder="0"
+                  value={w.points > 0 ? w.points.toLocaleString("en-US") : ""}
+                  onChange={(e) => setBalance(w, e.target.value)}
+                />
+                <span className="pb-bal-unit">pts</span>
+              </span>
               <button
                 type="button"
-                className="pb-wchip-x"
+                className="pb-bal-x"
                 aria-label={"Remove " + w.program}
                 onClick={() => {
                   trackCardRemoved(w.id, w.program, w.type);
+                  tracked.current.delete(w.program);
                   onRemove(w.id);
                 }}
               >
                 ×
               </button>
-            </span>
+            </div>
           ))}
         </div>
       )}
@@ -226,6 +255,10 @@ function PBWalletBuilder({
         </div>
         <div className="pb-pool-note">Card points transfer to either</div>
       </div>
+
+      <a className="pb-hero-cta pb-wallet-cta" href="#match">
+        Build My Points Travel Plan →
+      </a>
     </div>
   );
 }
@@ -239,6 +272,7 @@ function PBHeroAlerts({
   wallet,
   onAdd,
   onRemove,
+  onUpdate,
 }: {
   selectedId: string;
   selectedDestination: Destination;
@@ -247,6 +281,7 @@ function PBHeroAlerts({
   wallet: WalletEntry[];
   onAdd: (entry: WalletEntry) => void;
   onRemove: (id: number) => void;
+  onUpdate: (id: number, points: number) => void;
 }) {
   const sel = selectedDestination;
   const pinned = DESTINATIONS.map((d) => ({ ...d, pinColor: TONE_VAR[summarize(d).tone] }));
@@ -265,12 +300,9 @@ function PBHeroAlerts({
           <p className="pb-hero-lede">
             See whether transferring points could unlock better travel value.
           </p>
-          <a className="pb-hero-cta" href="#match">
-            Build My Points Travel Plan →
-          </a>
         </div>
         <div className="pb-hero-grid">
-          <PBWalletBuilder wallet={wallet} onAdd={onAdd} onRemove={onRemove} />
+          <PBWalletBuilder wallet={wallet} onAdd={onAdd} onRemove={onRemove} onUpdate={onUpdate} />
           <div className="pb-map-card pb-map-card-sm">
             <div className="pb-map-card-head">
               <div>
@@ -696,7 +728,7 @@ export default function VariantB() {
   const auth = useAuth();
   const [selectedId, setSelectedId] = useState("maldives");
   const [customDestination, setCustomDestination] = useState<Destination | null>(null);
-  const [wallet, setWallet] = useState<WalletEntry[]>(DEFAULT_WALLET);
+  const [wallet, setWallet] = useState<WalletEntry[]>([]);
   const selectedDestination = DESTINATIONS.find((d) => d.id === selectedId) ?? customDestination;
   const dest = selectedDestination ?? DESTINATIONS[0];
   const pools = pbPools(wallet);
@@ -726,6 +758,8 @@ export default function VariantB() {
   };
   const onAdd = (entry: WalletEntry) => setWallet((w) => [...w, entry]);
   const onRemove = (id: number) => setWallet((w) => w.filter((x) => x.id !== id));
+  const onUpdate = (id: number, points: number) =>
+    setWallet((w) => w.map((x) => (x.id === id ? { ...x, points } : x)));
 
   return (
     <div id="top" className="pb-app">
@@ -744,6 +778,7 @@ export default function VariantB() {
         wallet={wallet}
         onAdd={onAdd}
         onRemove={onRemove}
+        onUpdate={onUpdate}
       />
       <section className="pb-compare" id="match">
         <div className="pb-compare-head">
