@@ -66,6 +66,7 @@ a { color: inherit; text-decoration: none; }
 .pb-nav-links a { color: rgba(255,255,255,.88); font-weight: 600; font-size: 15px; transition: color .15s; }
 .pb-nav-links a:hover { color: #fff; }
 .pb-nav-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.pb-share-btn { min-width: 86px; }
 .pb-balance {
   display: flex; align-items: baseline; gap: 6px; color: #fff;
   background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.28);
@@ -769,6 +770,7 @@ html[data-density="compact"] .pb-vc-left, html[data-density="compact"] .pb-vc-ri
 @media (max-width: 980px) {
   .pb-hero-inner { grid-template-columns: 1fr; gap: 30px; }
   .pb-nav-links { display: none; }
+  .pb-share-btn { min-width: 0; }
   .pb-verdict-card { grid-template-columns: 1fr; }
   .pb-vc-right { border-left: 0; border-top: 1px solid var(--line); }
   .pb-how-grid { grid-template-columns: 1fr; }

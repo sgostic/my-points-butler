@@ -21,6 +21,8 @@ import { WorldMap } from "./world-map";
 import { AuthModal, useAuth } from "../auth";
 import { PBFeedbackModal } from "../feedback-modal";
 import { PBFooter } from "../footer";
+import { PBNavMark } from "../nav-mark";
+import { PBShareButton } from "../share-button";
 import {
   EVENTS,
   track,
@@ -41,17 +43,6 @@ const TONE_VAR: Record<Tone, string> = {
 const DOT_COLOR = "#C2AE9F";
 const FRAMING = 1; // 0 gentle · 1 balanced · 2 bold
 
-const ButlerMark = ({ size = 20 }: { size?: number }) => (
-  <svg viewBox="0 0 24 24" width={size} height={size} fill="none">
-    <path
-      d="M12 3c-3.3 0-6 2.6-6 5.8 0 1.8.9 3.2 2 4.2v2h8v-2c1.1-1 2-2.4 2-4.2C18 5.6 15.3 3 12 3Z"
-      fill="currentColor"
-    />
-    <rect x="7" y="16.5" width="10" height="2.4" rx="1.2" fill="currentColor" />
-    <circle cx="12" cy="20.4" r="1.4" fill="currentColor" />
-  </svg>
-);
-
 /* ---------- Top navigation ---------- */
 function PBNav({
   balance,
@@ -70,7 +61,7 @@ function PBNav({
     <header className="pb-nav">
       <a className="pb-brand" href="#top">
         <span className="pb-brand-mark" aria-hidden="true">
-          <ButlerMark size={20} />
+          <PBNavMark size={20} />
         </span>
         <span className="pb-brand-name">My Points Butler</span>
       </a>
@@ -81,6 +72,7 @@ function PBNav({
       </nav>
       <div className="pb-nav-right">
         {userEmail ? <span className="pb-nav-user">{userEmail}</span> : null}
+        <PBShareButton variant="a" />
         <div className="pb-balance" title="Your combined miles & points">
           <span className="pb-balance-label">Your balance</span>
           <span className="pb-balance-num">{fmt(balance)}</span>
