@@ -11,6 +11,7 @@ import { resolveVariant } from "@/components/pages";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureSession, flush, registerVisit, setVariant, track } from "./client";
+import { trackMetaPixel } from "@/lib/meta-pixel";
 import { EVENTS } from "./events";
 
 const SCROLL_THRESHOLDS = [25, 50, 75, 100] as const;
@@ -56,6 +57,20 @@ export function AnalyticsProvider({
     track(EVENTS.PAGE_VIEW, { variant });
     // Intentionally run once per mount; variant changes within the SPA are
     // reported via variant_switched from the nav, not a new page_view here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Signup attribution: the auth callback redirects new accounts back with
+  // ?signup=<method> (google/email/…). Fire signup analytics once, then strip
+  // the param so it doesn't re-fire on refresh.
+  useEffect(() => {
+    const method = searchParams.get("signup");
+    if (!method) return;
+    track(EVENTS.SIGNUP_COMPLETED, { method });
+    trackMetaPixel("CompleteRegistration", { method });
+    const url = new URL(window.location.href);
+    url.searchParams.delete("signup");
+    window.history.replaceState(null, "", url.toString());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

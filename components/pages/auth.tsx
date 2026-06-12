@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getSiteUrl, isSupabaseConfigured } from "@/lib/supabase/config";
 import { EVENTS, track } from "@/lib/analytics";
+import { trackMetaPixel } from "@/lib/meta-pixel";
 
 export type AuthMode = "sign-in" | "sign-up";
 
-export function getAuthCallbackUrl() {
+export function getAuthCallbackUrl(intent?: AuthMode) {
   const origin =
     typeof window === "undefined" ? getSiteUrl() : window.location.origin;
   const next =
@@ -17,6 +18,12 @@ export function getAuthCallbackUrl() {
       : `${window.location.pathname}${window.location.search}${window.location.hash}`;
   const callbackUrl = new URL("/auth/callback", origin.replace(/\/$/, ""));
   callbackUrl.searchParams.set("next", next);
+  // Carry signup intent through the OAuth/email round-trip so the callback can
+  // attribute the return as a signup even though Supabase doesn't distinguish
+  // signup from sign-in for OAuth.
+  if (intent === "sign-up") {
+    callbackUrl.searchParams.set("intent", "signup");
+  }
 
   return callbackUrl.toString();
 }
@@ -108,12 +115,13 @@ export function useAuth() {
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: trimmedEmail,
           password,
-          options: { emailRedirectTo: getAuthCallbackUrl() },
+          options: { emailRedirectTo: getAuthCallbackUrl("sign-up") },
         });
         if (signUpError) throw signUpError;
 
         if (data.session) {
           track(EVENTS.SIGNUP_COMPLETED, { method: "email" });
+          trackMetaPixel("CompleteRegistration", { method: "email" });
           setIsAuthOpen(false);
           return;
         }
@@ -150,7 +158,7 @@ export function useAuth() {
       const supabase = createClient();
       const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: getAuthCallbackUrl() },
+        options: { redirectTo: getAuthCallbackUrl(authMode) },
       });
       if (googleError) throw googleError;
     } catch (authError) {

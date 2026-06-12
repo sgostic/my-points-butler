@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Suspense } from "react";
+import Script from "next/script";
 import { AnalyticsProvider } from "@/lib/analytics";
+import { META_PIXEL_ID } from "@/lib/meta-pixel";
 import { getSiteUrl } from "@/lib/supabase/config";
 import "./globals.css";
 
@@ -78,6 +80,31 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <AnalyticsProvider>{children}</AnalyticsProvider>
         </Suspense>
+        <Script id="meta-pixel" strategy="afterInteractive">
+          {`!function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('set', 'autoConfig', false, '${META_PIXEL_ID}');
+          fbq('init', '${META_PIXEL_ID}');
+          fbq('track', 'PageView');`}
+        </Script>
+        <noscript>
+          {/* Standard Meta Pixel no-JS fallback — a 1x1 tracking pixel, not a
+              content image, so next/image does not apply. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            alt=""
+            src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+          />
+        </noscript>
       </body>
       <GoogleAnalytics gaId="G-YP29V4JV9B" />
     </html>
