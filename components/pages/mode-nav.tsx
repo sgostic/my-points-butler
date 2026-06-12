@@ -48,7 +48,7 @@ export function PBModeNav({
           disabled={isSubmitting}
           onClick={userEmail ? onSignOut : onSignIn}
         >
-          {userEmail ? "Sign out" : "Sign in"}
+          {userEmail ? "Sign out" : "Sign Up"}
         </button>
       </div>
     </header>

@@ -508,7 +508,7 @@ export default function VariantC() {
         balanceLabel="Points"
         userEmail={auth.userEmail}
         isSubmitting={auth.isSubmitting}
-        onSignIn={() => auth.openAuthModal("sign-in")}
+        onSignIn={() => auth.openAuthModal("sign-up")}
         onSignOut={auth.handleSignOut}
       />
       <PBHeroGoals

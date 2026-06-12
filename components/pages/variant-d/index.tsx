@@ -512,7 +512,7 @@ export default function VariantD() {
         balanceLabel="Points"
         userEmail={auth.userEmail}
         isSubmitting={auth.isSubmitting}
-        onSignIn={() => auth.openAuthModal("sign-in")}
+        onSignIn={() => auth.openAuthModal("sign-up")}
         onSignOut={auth.handleSignOut}
       />
       <section className="pb-hero pb-hero-alerts pb-hero-discover" id="explore">

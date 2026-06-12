@@ -85,7 +85,7 @@ function PBNav({
           disabled={isSubmitting}
           onClick={userEmail ? onSignOut : onSignIn}
         >
-          {userEmail ? "Sign out" : "Sign in"}
+          {userEmail ? "Sign out" : "Sign Up"}
         </button>
       </div>
     </header>
@@ -617,7 +617,7 @@ export default function VariantA() {
         balance={balance}
         userEmail={auth.userEmail}
         isSubmitting={auth.isSubmitting}
-        onSignIn={() => auth.openAuthModal("sign-in")}
+        onSignIn={() => auth.openAuthModal("sign-up")}
         onSignOut={auth.handleSignOut}
       />
       <PBHero
