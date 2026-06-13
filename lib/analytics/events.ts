@@ -42,6 +42,7 @@ export const EVENTS = {
   SIGNOUT_COMPLETED: "signout_completed",
 
   // feedback / monetization
+  FEEDBACK_OPENED: "feedback_opened",
   FEEDBACK_SUBMITTED: "feedback_submitted",
   PAY_INTENT: "pay_intent",
   ALERT_CREATED: "alert_created",

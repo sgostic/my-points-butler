@@ -438,6 +438,7 @@ function PBAlertCTA({
     track(EVENTS.ALERT_CREATED, { destId: dest.id, email, watching });
     if (valid) trackSubscribe(email, "alert_cta", "b");
     setSent(true);
+    track(EVENTS.FEEDBACK_OPENED, { variant: "b", context: `${dest.city} deal alert signup` });
     setFeedback(true);
   };
 
@@ -454,7 +455,13 @@ function PBAlertCTA({
           <button
             type="button"
             className="pb-al-btn pb-al-btn-full"
-            onClick={() => setFeedback(true)}
+            onClick={() => {
+              track(EVENTS.FEEDBACK_OPENED, {
+                variant: "b",
+                context: `${dest.city} deal alert signup`,
+              });
+              setFeedback(true);
+            }}
           >
             Alert me when it&apos;s bookable
           </button>

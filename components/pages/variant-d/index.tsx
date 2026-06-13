@@ -321,7 +321,13 @@ function PBDealModal({
             <button
               type="button"
               className="pb-modal-book"
-              onClick={() => setFeedback(true)}
+              onClick={() => {
+                track(EVENTS.FEEDBACK_OPENED, {
+                  variant: "d",
+                  context: `Get ${d.city} deal`,
+                });
+                setFeedback(true);
+              }}
             >
               {isSignedIn ? `Book with ${fmt(cost)} pts →` : "Get this deal →"}
             </button>

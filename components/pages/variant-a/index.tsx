@@ -248,7 +248,13 @@ function PBVerdict({
         <button
           type="button"
           className="pb-vc-cta"
-          onClick={() => setFeedback(true)}
+          onClick={() => {
+            track(EVENTS.FEEDBACK_OPENED, {
+              variant: "a",
+              context: `${best.o.name} · ${dest.city} booking alert`,
+            });
+            setFeedback(true);
+          }}
         >
           {ctaLabel}
         </button>

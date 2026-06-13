@@ -8,6 +8,7 @@
 
 import { useEffect, useState } from "react";
 import { trackFeedback } from "@/lib/analytics";
+import { trackMetaPixel } from "@/lib/meta-pixel";
 import "./feedback-modal.css";
 
 type Scale = "yes" | "maybe" | "no";
@@ -53,6 +54,9 @@ export function PBFeedbackModal({
       wouldPay,
       monthlyPrice: price || null,
     });
+    // Mirror the conversion to Meta Pixel as a standard Lead event so feedback
+    // submissions are attributable in Ads Manager.
+    trackMetaPixel("Lead", { context: context ?? undefined });
     setDone(true);
   };
 

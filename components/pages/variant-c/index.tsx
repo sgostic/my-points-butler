@@ -240,7 +240,13 @@ function PBGoalCard({
             <button
               type="button"
               className="pb-goal-book"
-              onClick={() => setFeedback(true)}
+              onClick={() => {
+                track(EVENTS.FEEDBACK_OPENED, {
+                  variant: "c",
+                  context: `Book ${dest.city}`,
+                });
+                setFeedback(true);
+              }}
             >
               Book {dest.city} now →
             </button>
