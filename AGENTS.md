@@ -45,6 +45,19 @@ The homepage (`app/page.tsx`) is an A/B test. It's a Server Component that await
 
 CSS layering mirrors the original bundle: every variant loads `variant-a.css` (base) first; B/C/D then load `variant-b.css` (shared alerts components) before their own. When adding destinations or changing economics/metadata, edit `components/pages/variant-a/data.ts` — **all four variants consume it**. Reuse `world-map.tsx`, `mode-nav.tsx`, and the shared stylesheets rather than duplicating.
 
+## Onboarding flow (`/start`)
+
+The `/start` route is a standalone, client-driven onboarding funnel, separate from the A/B homepage. It recreates a Claude Design handoff but uses the project's cream/forest-green palette (not the screenshot's blue).
+
+- **`app/start/page.tsx`** — Server Component route that sets page `metadata` and renders `<PBStart />`.
+- **`components/pages/start/index.tsx`** — `"use client"`. `PBStart` is a single component holding a `phase` state machine (`"hero" → "quiz" → "building" → "email" → "done"`) plus the local answer state. Sub-components: `PBTopNav` (brand + optional progress bar + "Step X of N" + "Exit"), `PBHero` (split hero: badge · gradient "guesswork" headline · CTA · `sunny-beach.webp` via `next/image`), `PBQuiz`, `PBBuilding`, `PBEmail`, `PBAllSet`.
+- **`components/pages/start/start.css`** — standalone stylesheet with a `pb-start-` / `pb-quiz-` / `pb-build-` / `pb-cap-` / `pb-done-` class prefix. It **re-declares its own palette tokens** at `.pb-start` (does not depend on `variant-a.css`). Fully responsive.
+- **Questionnaire** — `QUESTIONS` array (5 steps): travel frequency, travel companions (single-select radios); rewards held and what-to-understand (`multi: true` → checkboxes, multiple selections); points balance (radio). "Continue" is disabled until answered; the last step reads "See my plan".
+- **Building phase** — `BUILD_STEPS` array; a CSS spinner plus rows that reveal one at a time (outlined circle → fills green with a checkmark), then auto-advances to the email phase.
+- **Email + done** — `PBEmail` validates the address before enabling "Get My Plan"; submitting **or** "Skip for now" advances to `PBAllSet`. Both "Skip for now" and "View My Recommendations" navigate to the homepage (`/`) via `useRouter` from `next/navigation`.
+- **Logo** — reuses `PBNavMark` from `components/pages/nav-mark.tsx`; do not swap the mark.
+- **Status: UI only** — no analytics, no email persistence, no backend. Wire `track*` helpers / the `email_subscriptions` table later if needed.
+
 ## Analytics & event tracking
 
 User activity is logged to Supabase as an append-only `events` stream plus normalized projection tables. **Full reference: [`docs/ANALYTICS.md`](docs/ANALYTICS.md).** The essentials:
