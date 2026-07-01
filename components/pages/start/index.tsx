@@ -45,22 +45,38 @@ const QUESTIONS: Question[] = [
     eyebrow: "Choose one",
     title: "Who do you travel with?",
     sub: "Pick the one that fits most trips.",
-    options: ["Alone", "Partner", "Family"],
+    options: ["Single", "Partner", "Family"],
+  },
+  {
+    id: "points_usage",
+    eyebrow: "Choose one",
+    title: "How do you use your points/miles?",
+    sub: "Pick the pattern that sounds most like you.",
+    options: [
+      "Save them for one big trip",
+      "Spend them on several smaller trips",
+      "Use them for seat/class upgrades",
+      "Put them toward hotels & stays",
+      "Still saving / haven't used them yet",
+    ],
   },
   {
     id: "rewards_held",
     eyebrow: "Choose all that apply",
-    title: "Which rewards do you currently have?",
-    sub: "Across all your cards and programs.",
+    title: "Which credit cards or reward programs do you use for travel?",
+    sub: "Select every card or loyalty program you actively use.",
     multi: true,
     options: [
-      "Chase",
-      "Amex",
-      "Capital One",
-      "Citi",
-      "Airline miles",
-      "Hotel points",
-      "Not sure",
+      "Chase Sapphire Reserve",
+      "Chase Sapphire Preferred",
+      "Amex Platinum",
+      "Amex Gold",
+      "Capital One Venture X",
+      "Capital One Venture",
+      "Citi Strata Premiere",
+      "Citi Strata Elite",
+      "Airline Loyalty",
+      "Hotel Loyalty",
       "Other",
     ],
   },
@@ -81,7 +97,7 @@ const QUESTIONS: Question[] = [
     eyebrow: "Choose one",
     title: "What is your priority?",
     sub: "We'll tailor your plan around this.",
-    options: ["Flights", "Hotels", "Cashback", "All above"],
+    options: ["Flights", "Hotels", "Cashback", "All above", "Other"],
   },
   {
     id: "hardest_part",
@@ -89,12 +105,11 @@ const QUESTIONS: Question[] = [
     title: "What's the hardest part about using your points?",
     sub: "Pick what trips you up the most.",
     options: [
-      "Knowing if points are worth using",
       "Choosing cash vs. points",
       "Figuring out where to transfer",
       "Finding the best trip / redemption",
       "Picking the right card to use",
-      "Tracking everything",
+      "Tracking your point earnings",
       "Knowing whether to save points for later",
     ],
   },
@@ -203,8 +218,9 @@ function PBQuiz({
   const total = QUESTIONS.length;
   const q = QUESTIONS[index];
   const selected = answers[index];
-  const hasAnswer = selected.length > 0;
   const showOther = selected.includes("Other");
+  const hasOtherValue = otherText[index].trim().length > 0;
+  const hasAnswer = selected.length > 0 && (!showOther || hasOtherValue);
 
   // Fire once per question shown. Comparing distinct sessions across `step`
   // values is the drop-off funnel: a cliff between step N and N+1 pinpoints
