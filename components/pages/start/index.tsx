@@ -19,7 +19,6 @@ import {
   trackOnboardingCompleted,
   trackOnboardingEmail,
   trackOnboardingSkipped,
-  trackOnboardingExited,
 } from "@/lib/analytics";
 import { markOnboardingCompleted } from "@/lib/onboarding";
 import "./start.css";
@@ -111,11 +110,9 @@ const BUILD_STEPS = [
 function PBTopNav({
   progress,
   step,
-  onExit,
 }: {
   progress?: { current: number; total: number };
   step?: string;
-  onExit?: () => void;
 }) {
   return (
     <header className="pb-start-nav">
@@ -136,23 +133,18 @@ function PBTopNav({
         ) : null}
       </div>
       {step ? <span className="pb-start-step">{step}</span> : null}
-      <button type="button" className="pb-start-exit" onClick={onExit}>
-        Exit
-      </button>
     </header>
   );
 }
 
 function PBHero({
   onStart,
-  onExit,
 }: {
   onStart: () => void;
-  onExit: () => void;
 }) {
   return (
     <>
-      <PBTopNav onExit={onExit} />
+      <PBTopNav />
       <main className="pb-start-hero">
         <div className="pb-start-copy">
           <span className="pb-start-badge">
@@ -195,11 +187,9 @@ function PBHero({
 
 function PBQuiz({
   onExit,
-  onQuit,
   onDone,
 }: {
   onExit: () => void;
-  onQuit: (step: number) => void;
   onDone: () => void;
 }) {
   const [index, setIndex] = useState(0);
@@ -277,7 +267,6 @@ function PBQuiz({
       <PBTopNav
         progress={{ current: index + 1, total }}
         step={`Step ${index + 1} of ${total}`}
-        onExit={() => onQuit(index + 1)}
       />
       <main className="pb-start-quiz">
         <div className="pb-quiz-card">
@@ -500,12 +489,6 @@ export function PBStart() {
   const router = useRouter();
   const goHome = () => router.replace("/");
 
-  // Top-nav "Exit" — record where the visitor bailed, then reset the funnel.
-  const quit = (from: Phase, step?: number) => {
-    trackOnboardingExited(from, step);
-    setPhase("hero");
-  };
-
   const start = () => {
     trackOnboardingStarted();
     setPhase("quiz");
@@ -514,16 +497,15 @@ export function PBStart() {
   return (
     <div className="pb-start">
       {phase === "hero" ? (
-        <PBHero onStart={start} onExit={() => quit("hero")} />
+        <PBHero onStart={start} />
       ) : phase === "quiz" ? (
         <PBQuiz
           onExit={() => setPhase("hero")}
-          onQuit={(step) => quit("quiz", step)}
           onDone={() => setPhase("building")}
         />
       ) : (
         <>
-          <PBTopNav onExit={() => quit(phase)} />
+          <PBTopNav />
           {phase === "building" ? (
             <PBBuilding onDone={() => setPhase("email")} />
           ) : (

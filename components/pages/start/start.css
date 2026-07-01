@@ -91,21 +91,6 @@
   font-size: 19px;
   letter-spacing: -0.01em;
 }
-.pb-start-exit {
-  background: none;
-  border: 0;
-  padding: 6px 4px;
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--muted);
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-.pb-start-exit:hover {
-  color: var(--ink);
-}
-
 /* ---------- Hero ---------- */
 .pb-start-hero {
   flex: 1;
