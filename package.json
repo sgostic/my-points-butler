@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "export:analytics": "node scripts/export-all-events.mjs",
+    "jsonl:to:csv": "node scripts/jsonl-to-csv.mjs"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.9",
