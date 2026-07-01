@@ -21,6 +21,7 @@ import {
   trackOnboardingSkipped,
 } from "@/lib/analytics";
 import { markOnboardingCompleted } from "@/lib/onboarding";
+import { trackMetaPixel } from "@/lib/meta-pixel";
 import "./start.css";
 
 type Question = {
@@ -434,6 +435,7 @@ function PBEmail({ onDone }: { onDone: () => void }) {
     e.preventDefault();
     if (!valid) return;
     trackOnboardingEmail(email.trim());
+    trackMetaPixel("completedMailSubmission");
     markOnboardingCompleted();
     onDone();
   };
