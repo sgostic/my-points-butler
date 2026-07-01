@@ -151,13 +151,13 @@ function PBHero({
             Personalized · Free · 2 minutes
           </span>
           <h1 className="pb-start-title">
-            Find the right trip without the{" "}
-            <span className="grad">guesswork</span>.
+            Tell us your dream trips. We&rsquo;ll tell you what points to{" "}
+            <span className="grad">save, earn, or use</span>.
           </h1>
           <p className="pb-start-sub">
-            Answer a few quick questions and we&rsquo;ll build a personalized
-            points plan based on your balance, your priorities, and where you
-            actually want to go.
+            Answer a few quick questions and we&rsquo;ll build a points
+            strategy around the trips you actually want to take &mdash; based on
+            your balance, your priorities, and where you want to go.
           </p>
           <button type="button" className="pb-start-cta" onClick={onStart}>
             Start My Plan
