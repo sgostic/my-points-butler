@@ -61,16 +61,23 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
-    eyebrow: "Choose all that apply",
-    title: "What do you most want to understand?",
+    eyebrow: "Choose one",
+    title: "What is your priority?",
     sub: "We'll tailor your plan around this.",
-    multi: true,
+    options: ["Flights", "Hotels", "Cashback", "All above"],
+  },
+  {
+    eyebrow: "Choose one",
+    title: "What's the hardest part about using your points?",
+    sub: "Pick what trips you up the most.",
     options: [
-      "Cash value of my points",
-      "Flights",
-      "Hotels",
-      "Whether to save or use",
-      "Not sure",
+      "Knowing if points are worth using",
+      "Choosing cash vs. points",
+      "Figuring out where to transfer",
+      "Finding the best trip / redemption",
+      "Picking the right card to use",
+      "Tracking everything",
+      "Knowing whether to save points for later",
     ],
   },
 ];
@@ -170,11 +177,15 @@ function PBQuiz({
   const [answers, setAnswers] = useState<string[][]>(() =>
     QUESTIONS.map(() => []),
   );
+  const [otherText, setOtherText] = useState<string[]>(() =>
+    QUESTIONS.map(() => ""),
+  );
 
   const total = QUESTIONS.length;
   const q = QUESTIONS[index];
   const selected = answers[index];
   const hasAnswer = selected.length > 0;
+  const showOther = selected.includes("Other");
 
   const choose = (option: string) => {
     setAnswers((prev) => {
@@ -259,6 +270,23 @@ function PBQuiz({
               );
             })}
           </div>
+
+          {showOther ? (
+            <input
+              type="text"
+              className="pb-quiz-other"
+              placeholder="Tell us which one"
+              value={otherText[index]}
+              onChange={(e) =>
+                setOtherText((prev) => {
+                  const next = [...prev];
+                  next[index] = e.target.value;
+                  return next;
+                })
+              }
+              aria-label="Other — please specify"
+            />
+          ) : null}
 
           <div className="pb-quiz-actions">
             <button type="button" className="pb-quiz-back" onClick={back}>
@@ -399,35 +427,7 @@ function PBEmail({ onDone }: { onDone: () => void }) {
   );
 }
 
-function PBAllSet({ onView }: { onView: () => void }) {
-  return (
-    <main className="pb-start-done">
-      <div className="pb-done-card">
-        <span className="pb-done-check" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
-            <path
-              d="M5 12.5l4.5 4.5L19 7"
-              stroke="var(--save)"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-        <h1 className="pb-done-title">You&rsquo;re all set!</h1>
-        <p className="pb-done-sub">
-          We&rsquo;ve matched your points and priorities to real trips you can
-          book right now.
-        </p>
-        <button type="button" className="pb-done-cta" onClick={onView}>
-          View My Recommendations →
-        </button>
-      </div>
-    </main>
-  );
-}
-
-type Phase = "hero" | "quiz" | "building" | "email" | "done";
+type Phase = "hero" | "quiz" | "building" | "email";
 
 export function PBStart() {
   const [phase, setPhase] = useState<Phase>("hero");
@@ -448,10 +448,8 @@ export function PBStart() {
           <PBTopNav />
           {phase === "building" ? (
             <PBBuilding onDone={() => setPhase("email")} />
-          ) : phase === "email" ? (
-            <PBEmail onDone={() => setPhase("done")} />
           ) : (
-            <PBAllSet onView={goHome} />
+            <PBEmail onDone={goHome} />
           )}
         </>
       )}
