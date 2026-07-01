@@ -152,7 +152,7 @@ function PBHero({
           </span>
           <h1 className="pb-start-title">
             Tell us your dream trips. We&rsquo;ll tell you what points to{" "}
-            <span className="grad">save, earn, or use</span>.
+            <span className="grad">save, earn, or use</span>
           </h1>
           <p className="pb-start-sub">
             Answer a few quick questions and we&rsquo;ll build a points
