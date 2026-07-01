@@ -10,9 +10,19 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { PBNavMark } from "../nav-mark";
+import {
+  trackOnboardingStarted,
+  trackOnboardingStepViewed,
+  trackOnboardingAnswered,
+  trackOnboardingCompleted,
+  trackOnboardingEmail,
+  trackOnboardingSkipped,
+  trackOnboardingExited,
+} from "@/lib/analytics";
 import "./start.css";
 
 type Question = {
+  id: string;
   eyebrow: string;
   title: string;
   sub?: string;
@@ -22,18 +32,21 @@ type Question = {
 
 const QUESTIONS: Question[] = [
   {
+    id: "travel_frequency",
     eyebrow: "Choose one",
     title: "How many times do you travel a year?",
     sub: "A rough estimate is fine.",
     options: ["1 – 2", "3 – 5", "6+"],
   },
   {
+    id: "travel_companions",
     eyebrow: "Choose one",
     title: "Who do you travel with?",
     sub: "Pick the one that fits most trips.",
     options: ["Alone", "Partner", "Family"],
   },
   {
+    id: "rewards_held",
     eyebrow: "Choose all that apply",
     title: "Which rewards do you currently have?",
     sub: "Across all your cards and programs.",
@@ -50,6 +63,7 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
+    id: "points_balance",
     eyebrow: "Choose one",
     title: "About how many points or miles do you have?",
     sub: "Across all your cards and programs — a rough estimate is fine.",
@@ -61,12 +75,14 @@ const QUESTIONS: Question[] = [
     ],
   },
   {
+    id: "priority",
     eyebrow: "Choose one",
     title: "What is your priority?",
     sub: "We'll tailor your plan around this.",
     options: ["Flights", "Hotels", "Cashback", "All above"],
   },
   {
+    id: "hardest_part",
     eyebrow: "Choose one",
     title: "What's the hardest part about using your points?",
     sub: "Pick what trips you up the most.",
@@ -92,9 +108,11 @@ const BUILD_STEPS = [
 function PBTopNav({
   progress,
   step,
+  onExit,
 }: {
   progress?: { current: number; total: number };
   step?: string;
+  onExit?: () => void;
 }) {
   return (
     <header className="pb-start-nav">
@@ -115,17 +133,23 @@ function PBTopNav({
         ) : null}
       </div>
       {step ? <span className="pb-start-step">{step}</span> : null}
-      <button type="button" className="pb-start-exit">
+      <button type="button" className="pb-start-exit" onClick={onExit}>
         Exit
       </button>
     </header>
   );
 }
 
-function PBHero({ onStart }: { onStart: () => void }) {
+function PBHero({
+  onStart,
+  onExit,
+}: {
+  onStart: () => void;
+  onExit: () => void;
+}) {
   return (
     <>
-      <PBTopNav />
+      <PBTopNav onExit={onExit} />
       <main className="pb-start-hero">
         <div className="pb-start-copy">
           <span className="pb-start-badge">
@@ -168,9 +192,11 @@ function PBHero({ onStart }: { onStart: () => void }) {
 
 function PBQuiz({
   onExit,
+  onQuit,
   onDone,
 }: {
   onExit: () => void;
+  onQuit: (step: number) => void;
   onDone: () => void;
 }) {
   const [index, setIndex] = useState(0);
@@ -186,6 +212,25 @@ function PBQuiz({
   const selected = answers[index];
   const hasAnswer = selected.length > 0;
   const showOther = selected.includes("Other");
+
+  // Fire once per question shown. Comparing distinct sessions across `step`
+  // values is the drop-off funnel: a cliff between step N and N+1 pinpoints
+  // exactly which question loses people.
+  useEffect(() => {
+    const question = QUESTIONS[index];
+    trackOnboardingStepViewed(index + 1, total, question.id, question.title);
+  }, [index, total]);
+
+  /* Resolve a question's answer for logging: an array for multi-selects, a
+     single string otherwise. "Other" is expanded with its free-text value. */
+  const answerFor = (i: number): string | string[] => {
+    const withOther = answers[i].map((o) =>
+      o === "Other" && otherText[i].trim()
+        ? `Other: ${otherText[i].trim()}`
+        : o,
+    );
+    return QUESTIONS[i].multi ? withOther : (withOther[0] ?? "");
+  };
 
   const choose = (option: string) => {
     setAnswers((prev) => {
@@ -211,8 +256,17 @@ function PBQuiz({
 
   const advance = () => {
     if (!hasAnswer) return;
-    if (index < total - 1) setIndex((i) => i + 1);
-    else onDone();
+    trackOnboardingAnswered(index + 1, q.id, q.title, answerFor(index));
+    if (index < total - 1) {
+      setIndex((i) => i + 1);
+    } else {
+      const responses: Record<string, string | string[]> = {};
+      QUESTIONS.forEach((question, i) => {
+        responses[question.id] = answerFor(i);
+      });
+      trackOnboardingCompleted(responses);
+      onDone();
+    }
   };
 
   return (
@@ -220,6 +274,7 @@ function PBQuiz({
       <PBTopNav
         progress={{ current: index + 1, total }}
         step={`Step ${index + 1} of ${total}`}
+        onExit={() => onQuit(index + 1)}
       />
       <main className="pb-start-quiz">
         <div className="pb-quiz-card">
@@ -370,6 +425,12 @@ function PBEmail({ onDone }: { onDone: () => void }) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!valid) return;
+    trackOnboardingEmail(email.trim());
+    onDone();
+  };
+
+  const skip = () => {
+    trackOnboardingSkipped(QUESTIONS.length + 1);
     onDone();
   };
 
@@ -419,7 +480,7 @@ function PBEmail({ onDone }: { onDone: () => void }) {
           We&rsquo;ll only use this to send your recommendations and deal
           alerts. No spam, unsubscribe anytime.
         </p>
-        <button type="button" className="pb-cap-skip" onClick={onDone}>
+        <button type="button" className="pb-cap-skip" onClick={skip}>
           Skip for now
         </button>
       </form>
@@ -434,18 +495,30 @@ export function PBStart() {
   const router = useRouter();
   const goHome = () => router.push("/");
 
+  // Top-nav "Exit" — record where the visitor bailed, then leave.
+  const quit = (from: Phase, step?: number) => {
+    trackOnboardingExited(from, step);
+    goHome();
+  };
+
+  const start = () => {
+    trackOnboardingStarted();
+    setPhase("quiz");
+  };
+
   return (
     <div className="pb-start">
       {phase === "hero" ? (
-        <PBHero onStart={() => setPhase("quiz")} />
+        <PBHero onStart={start} onExit={() => quit("hero")} />
       ) : phase === "quiz" ? (
         <PBQuiz
           onExit={() => setPhase("hero")}
+          onQuit={(step) => quit("quiz", step)}
           onDone={() => setPhase("building")}
         />
       ) : (
         <>
-          <PBTopNav />
+          <PBTopNav onExit={() => quit(phase)} />
           {phase === "building" ? (
             <PBBuilding onDone={() => setPhase("email")} />
           ) : (

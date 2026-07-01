@@ -9,7 +9,7 @@ re-reading the whole tree.
 - Every meaningful action becomes a row in the Postgres `events` table (one
   append-only stream). High-value records are *also* written to a normalized
   table (`feedback_submissions`, `email_subscriptions`, `contact_messages`,
-  `donations`, `chat_messages`).
+  `donations`, `chat_messages`, `onboarding_responses`).
 - The browser **never** writes to Supabase directly. It buffers events and
   POSTs batches to `app/api/track/route.ts`, which writes with the
   **service-role** key. RLS is locked down (no public read/write).
@@ -21,6 +21,7 @@ re-reading the whole tree.
 | Concern | File |
 | --- | --- |
 | Schema (tables, enums, RLS) | `supabase/migrations/0001_analytics.sql` |
+| Onboarding events + `onboarding_responses` table | `supabase/migrations/0002_onboarding_events.sql` |
 | Canonical event names + types | `lib/analytics/events.ts` |
 | Browser `track()` + batching + helpers | `lib/analytics/client.ts` |
 | Auto-capture provider (page view, scroll, time-on-page, auth link) | `lib/analytics/provider.tsx` |
@@ -94,7 +95,20 @@ re-reading the whole tree.
 | `feedback_submitted` | `feedback-modal.tsx` `submit()` → `feedback_submissions` | `{ context, liked, disliked, helps, wouldPay, monthlyPrice }` |
 | `pay_intent` | same, when `wouldPay !== "no"` | `{ wouldPay, monthlyPrice, context }` |
 | `alert_created` | B `PBAlertCTA.setAlert()` | `{ destId, email, watching }` |
-| `email_subscribed` | B alert CTA (`source: alert_cta`) → `email_subscriptions` | `{ email, source, variant }` |
+| `email_subscribed` | B alert CTA (`source: alert_cta`); `/start` email step (`source: onboarding`) → `email_subscriptions` | `{ email, source, variant }` |
+| `onboarding_started` | `/start` hero CTA | `{}` |
+| `onboarding_step_viewed` | `/start` `PBQuiz` per-question effect | `{ step, total, questionId, question }` |
+| `onboarding_question_answered` | `/start` Continue / See my plan | `{ step, questionId, question, answer }` |
+| `onboarding_completed` | `/start` last question → `onboarding_responses` | `{ responses }` |
+| `onboarding_email_submitted` | `/start` email submit (also `email_subscribed`) | `{ email }` |
+| `onboarding_skipped` | `/start` "Skip for now" | `{ step }` |
+| `onboarding_exited` | `/start` top-nav "Exit" | `{ phase, step }` |
+
+> **Drop-off:** the onboarding funnel is designed so drop-off is a per-step
+> count. Compare distinct sessions across `onboarding_step_viewed` `step`
+> values — a gap between step N and N+1 is exactly where question N loses
+> people. `started` → `completed` → `email_submitted`/`skipped` bound the
+> ends; `exited` catches explicit abandonment.
 
 > Google OAuth sign-up/in completion is intentionally **not** emitted as a
 > discrete `signup_completed`/`signin_completed` (would over-count on every

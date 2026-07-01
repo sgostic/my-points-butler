@@ -159,6 +159,21 @@ function projectionFor(
           status: "intent",
         },
       };
+    case EVENTS.ONBOARDING_COMPLETED: {
+      const responses =
+        p.responses && typeof p.responses === "object" ? p.responses : null;
+      if (!responses) return null;
+      return {
+        table: "onboarding_responses",
+        row: {
+          visitor_id: base.visitor_id,
+          session_id: base.session_id,
+          user_id: base.user_id,
+          variant: base.variant,
+          responses,
+        },
+      };
+    }
     case EVENTS.CHAT_MESSAGE_SENT: {
       const conversationId = asString(p.conversationId);
       const content = asString(p.content);

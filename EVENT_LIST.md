@@ -47,6 +47,22 @@ projection tables where noted). See `docs/ANALYTICS.md` for the full system.
 | `signin_completed` | email sign-in | `{ method:"email" }` |
 | `signout_completed` | sign out | `{}` |
 
+### Onboarding funnel (`/start`)
+Drop-off is measured by comparing distinct sessions across `onboarding_step_viewed`
+`step` values — a cliff between step N and N+1 pinpoints the question that loses
+people. `onboarding_completed` also lands the full Q&A set in the
+`onboarding_responses` table (one row per finished questionnaire).
+
+| Event | Where | Payload |
+| --- | --- | --- |
+| `onboarding_started` | hero "Start My Plan" CTA | `{}` |
+| `onboarding_step_viewed` | each question shown (`PBQuiz` effect) | `{ step, total, questionId, question }` |
+| `onboarding_question_answered` | Continue / See my plan | `{ step, questionId, question, answer }` |
+| `onboarding_completed` | last question → building → `onboarding_responses` | `{ responses }` |
+| `onboarding_email_submitted` | email form submit (also emits `email_subscribed`, `source:"onboarding"`) | `{ email }` |
+| `onboarding_skipped` | "Skip for now" | `{ step }` |
+| `onboarding_exited` | top-nav "Exit" | `{ phase, step }` |
+
 ### Feedback / monetization
 | Event | Where | Payload |
 | --- | --- | --- |

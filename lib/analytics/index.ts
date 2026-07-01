@@ -21,6 +21,13 @@ export {
   trackDonateIntent,
   trackChatOpened,
   trackChatMessage,
+  trackOnboardingStarted,
+  trackOnboardingStepViewed,
+  trackOnboardingAnswered,
+  trackOnboardingCompleted,
+  trackOnboardingEmail,
+  trackOnboardingSkipped,
+  trackOnboardingExited,
 } from "./client";
 export {
   EVENTS,

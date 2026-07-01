@@ -322,6 +322,60 @@ export function trackCta(label: string, variant?: VariantKey, context?: string) 
   track(EVENTS.CTA_CLICKED, { label, variant, context });
 }
 
+/* ---- Onboarding funnel (/start) --------------------------------------- */
+/* One event per step boundary so drop-off is a simple per-step count:
+   started → step_viewed×N / question_answered×N → completed → email|skipped,
+   with exited firing on abandonment. */
+
+export function trackOnboardingStarted() {
+  track(EVENTS.ONBOARDING_STARTED, {});
+}
+
+export function trackOnboardingStepViewed(
+  step: number,
+  total: number,
+  questionId: string,
+  question: string,
+) {
+  track(EVENTS.ONBOARDING_STEP_VIEWED, { step, total, questionId, question });
+}
+
+export function trackOnboardingAnswered(
+  step: number,
+  questionId: string,
+  question: string,
+  answer: string | string[],
+) {
+  track(EVENTS.ONBOARDING_QUESTION_ANSWERED, {
+    step,
+    questionId,
+    question,
+    answer,
+  });
+}
+
+export function trackOnboardingCompleted(
+  responses: Record<string, string | string[] | null>,
+) {
+  track(EVENTS.ONBOARDING_COMPLETED, { responses });
+}
+
+/* Email capture at the end of the flow. Also emits `email_subscribed` so the
+   address lands in the normalized `email_subscriptions` table like other
+   subscribe sources. */
+export function trackOnboardingEmail(email: string) {
+  track(EVENTS.ONBOARDING_EMAIL_SUBMITTED, { email });
+  track(EVENTS.EMAIL_SUBSCRIBED, { email, source: "onboarding" });
+}
+
+export function trackOnboardingSkipped(step: number) {
+  track(EVENTS.ONBOARDING_SKIPPED, { step });
+}
+
+export function trackOnboardingExited(phase: string, step?: number) {
+  track(EVENTS.ONBOARDING_EXITED, { phase, step });
+}
+
 // --- Ready for features that don't exist yet (just call these once built) ---
 
 export function trackShare(method: string, variant?: VariantKey) {

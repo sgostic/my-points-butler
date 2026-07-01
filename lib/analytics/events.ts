@@ -41,6 +41,15 @@ export const EVENTS = {
   SIGNIN_COMPLETED: "signin_completed",
   SIGNOUT_COMPLETED: "signout_completed",
 
+  // onboarding funnel (/start)
+  ONBOARDING_STARTED: "onboarding_started",
+  ONBOARDING_STEP_VIEWED: "onboarding_step_viewed",
+  ONBOARDING_QUESTION_ANSWERED: "onboarding_question_answered",
+  ONBOARDING_COMPLETED: "onboarding_completed",
+  ONBOARDING_EMAIL_SUBMITTED: "onboarding_email_submitted",
+  ONBOARDING_SKIPPED: "onboarding_skipped",
+  ONBOARDING_EXITED: "onboarding_exited",
+
   // feedback / monetization
   FEEDBACK_OPENED: "feedback_opened",
   FEEDBACK_SUBMITTED: "feedback_submitted",
@@ -79,6 +88,11 @@ export const IMPORTANT_EVENTS: ReadonlySet<EventName> = new Set<EventName>([
   EVENTS.CONTACT_SUBMITTED,
   EVENTS.DONATE_CLICKED,
   EVENTS.CHAT_MESSAGE_SENT,
+  // Onboarding funnel exits/conversions — flush before the tab navigates away.
+  EVENTS.ONBOARDING_COMPLETED,
+  EVENTS.ONBOARDING_EMAIL_SUBMITTED,
+  EVENTS.ONBOARDING_SKIPPED,
+  EVENTS.ONBOARDING_EXITED,
 ]);
 
 export type VariantKey = "a" | "b" | "c" | "d";
