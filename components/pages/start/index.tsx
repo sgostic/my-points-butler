@@ -53,7 +53,12 @@ const QUESTIONS: Question[] = [
     eyebrow: "Choose one",
     title: "About how many points or miles do you have?",
     sub: "Across all your cards and programs — a rough estimate is fine.",
-    options: ["Under 50,000", "50,000 – 150,000", "150,000 – 300,000", "300,000+"],
+    options: [
+      "Under 50,000",
+      "50,000 – 150,000",
+      "150,000 – 300,000",
+      "300,000+",
+    ],
   },
   {
     eyebrow: "Choose all that apply",
@@ -116,13 +121,17 @@ function PBHero({ onStart }: { onStart: () => void }) {
       <PBTopNav />
       <main className="pb-start-hero">
         <div className="pb-start-copy">
-          <span className="pb-start-badge">Personalized · Free · 2 minutes</span>
+          <span className="pb-start-badge">
+            Personalized · Free · 2 minutes
+          </span>
           <h1 className="pb-start-title">
-            Find the right trip without the <span className="grad">guesswork</span>.
+            Find the right trip without the{" "}
+            <span className="grad">guesswork</span>.
           </h1>
           <p className="pb-start-sub">
-            Answer a few quick questions and we&rsquo;ll build a personalized points plan
-            based on your balance, your priorities, and where you actually want to go.
+            Answer a few quick questions and we&rsquo;ll build a personalized
+            points plan based on your balance, your priorities, and where you
+            actually want to go.
           </p>
           <button type="button" className="pb-start-cta" onClick={onStart}>
             Start My Plan
@@ -141,17 +150,25 @@ function PBHero({ onStart }: { onStart: () => void }) {
             sizes="(max-width: 900px) 100vw, 50vw"
           />
           <span className="pb-start-media-tint" aria-hidden="true" />
-          <span className="pb-start-badge-float">Trusted by frequent flyers</span>
+          <span className="pb-start-badge-float">
+            Trusted by frequent flyers
+          </span>
         </div>
       </main>
     </>
   );
 }
 
-function PBQuiz({ onExit, onDone }: { onExit: () => void; onDone: () => void }) {
+function PBQuiz({
+  onExit,
+  onDone,
+}: {
+  onExit: () => void;
+  onDone: () => void;
+}) {
   const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<string[][]>(
-    () => QUESTIONS.map(() => []),
+  const [answers, setAnswers] = useState<string[][]>(() =>
+    QUESTIONS.map(() => []),
   );
 
   const total = QUESTIONS.length;
@@ -221,7 +238,12 @@ function PBQuiz({ onExit, onDone }: { onExit: () => void; onDone: () => void }) 
                 >
                   <span className="pb-quiz-radio" aria-hidden="true">
                     {q.multi ? (
-                      <svg viewBox="0 0 16 16" width="11" height="11" fill="none">
+                      <svg
+                        viewBox="0 0 16 16"
+                        width="11"
+                        height="11"
+                        fill="none"
+                      >
                         <path
                           d="M3 8.2l3 3 7-7.4"
                           stroke="#fff"
@@ -348,8 +370,8 @@ function PBEmail({ onDone }: { onDone: () => void }) {
         </span>
         <h1 className="pb-cap-title">Your plan is almost ready</h1>
         <p className="pb-cap-sub">
-          Drop your email and we&rsquo;ll send your personalized points plan, plus alerts
-          when your matched trips get cheaper.
+          Drop your email and we&rsquo;ll send your personalized points plan,
+          plus alerts when your matched trips get cheaper.
         </p>
 
         <input
@@ -366,8 +388,8 @@ function PBEmail({ onDone }: { onDone: () => void }) {
         </button>
 
         <p className="pb-cap-note">
-          We&rsquo;ll only use this to send your recommendations and deal alerts. No spam,
-          unsubscribe anytime.
+          We&rsquo;ll only use this to send your recommendations and deal
+          alerts. No spam, unsubscribe anytime.
         </p>
         <button type="button" className="pb-cap-skip" onClick={onDone}>
           Skip for now
@@ -394,7 +416,8 @@ function PBAllSet({ onView }: { onView: () => void }) {
         </span>
         <h1 className="pb-done-title">You&rsquo;re all set!</h1>
         <p className="pb-done-sub">
-          We&rsquo;ve matched your points and priorities to real trips you can book right now.
+          We&rsquo;ve matched your points and priorities to real trips you can
+          book right now.
         </p>
         <button type="button" className="pb-done-cta" onClick={onView}>
           View My Recommendations →
@@ -416,7 +439,10 @@ export function PBStart() {
       {phase === "hero" ? (
         <PBHero onStart={() => setPhase("quiz")} />
       ) : phase === "quiz" ? (
-        <PBQuiz onExit={() => setPhase("hero")} onDone={() => setPhase("building")} />
+        <PBQuiz
+          onExit={() => setPhase("hero")}
+          onDone={() => setPhase("building")}
+        />
       ) : (
         <>
           <PBTopNav />

@@ -3,24 +3,29 @@
    depend on variant-a's CSS being loaded. Layout mirrors the Claude Design
    handoff; colors follow the project's cream/forest-green system. */
 .pb-start {
-  --brand: #0E5A4A;
-  --brand-2: #14806A;
-  --save: #138A63;
-  --ink: #1F1410;
-  --ink-soft: #3A2A22;
-  --muted: #6B5147;
-  --line: #E6D6CB;
-  --line-soft: #F0E3D9;
-  --bg: #F9EFE9;
-  --card: #FFFDFB;
-  --shadow-lg: 0 30px 70px rgba(31, 20, 16, .16), 0 8px 24px rgba(31, 20, 16, .10);
+  --brand: #0e5a4a;
+  --brand-2: #14806a;
+  --save: #138a63;
+  --ink: #1f1410;
+  --ink-soft: #3a2a22;
+  --muted: #6b5147;
+  --line: #e6d6cb;
+  --line-soft: #f0e3d9;
+  --bg: #f9efe9;
+  --card: #fffdfb;
+  --shadow-lg:
+    0 30px 70px rgba(31, 20, 16, 0.16), 0 8px 24px rgba(31, 20, 16, 0.1);
 
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(circle at 82% 12%, rgba(20, 128, 106, .10), transparent 42%),
-    radial-gradient(circle at 8% 88%, rgba(19, 138, 99, .08), transparent 40%),
+    radial-gradient(
+      circle at 82% 12%,
+      rgba(20, 128, 106, 0.1),
+      transparent 42%
+    ),
+    radial-gradient(circle at 8% 88%, rgba(19, 138, 99, 0.08), transparent 40%),
     var(--bg);
   color: var(--ink);
   font-family: var(--font-body), system-ui, sans-serif;
@@ -64,7 +69,7 @@
   inset: 0 auto 0 0;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--brand), var(--brand-2));
-  transition: width .3s ease;
+  transition: width 0.3s ease;
 }
 .pb-start-step {
   font-size: 14px;
@@ -79,7 +84,7 @@
   border-radius: 9px;
   color: #fff;
   background: linear-gradient(140deg, var(--brand), var(--brand-2));
-  box-shadow: 0 4px 12px rgba(14, 90, 74, .28);
+  box-shadow: 0 4px 12px rgba(14, 90, 74, 0.28);
 }
 .pb-start-brand-name {
   font-family: var(--font-head);
@@ -95,7 +100,7 @@
   font-size: 15px;
   color: var(--muted);
   cursor: pointer;
-  transition: color .15s ease;
+  transition: color 0.15s ease;
 }
 .pb-start-exit:hover {
   color: var(--ink);
@@ -126,7 +131,7 @@
   color: var(--brand);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .pb-start-title {
@@ -165,12 +170,14 @@
   font-size: 16px;
   color: #fff;
   background: linear-gradient(140deg, var(--brand), var(--brand-2));
-  box-shadow: 0 12px 26px rgba(14, 90, 74, .28);
+  box-shadow: 0 12px 26px rgba(14, 90, 74, 0.28);
   cursor: pointer;
-  transition: transform .12s ease, box-shadow .2s ease;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.2s ease;
 }
 .pb-start-cta:hover {
-  box-shadow: 0 16px 34px rgba(14, 90, 74, .34);
+  box-shadow: 0 16px 34px rgba(14, 90, 74, 0.34);
 }
 .pb-start-cta:active {
   transform: translateY(1px);
@@ -196,7 +203,11 @@
 .pb-start-media-tint {
   position: absolute;
   inset: 0;
-  background: linear-gradient(155deg, rgba(20, 128, 106, .10), rgba(31, 20, 16, .16));
+  background: linear-gradient(
+    155deg,
+    rgba(20, 128, 106, 0.1),
+    rgba(31, 20, 16, 0.16)
+  );
   pointer-events: none;
 }
 .pb-start-badge-float {
@@ -208,12 +219,12 @@
   gap: 9px;
   padding: 9px 16px;
   border-radius: 999px;
-  background: rgba(255, 253, 251, .94);
+  background: rgba(255, 253, 251, 0.94);
   backdrop-filter: blur(6px);
   color: var(--ink);
   font-weight: 700;
   font-size: 14px;
-  box-shadow: 0 8px 22px rgba(31, 20, 16, .18);
+  box-shadow: 0 8px 22px rgba(31, 20, 16, 0.18);
 }
 .pb-start-badge-float::before {
   content: "";
@@ -241,7 +252,7 @@
   display: inline-block;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: .14em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--brand);
 }
@@ -275,14 +286,17 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--card);
-  box-shadow: var(--shadow-sm, 0 1px 2px rgba(31, 20, 16, .05));
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(31, 20, 16, 0.05));
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 600;
   color: var(--ink);
   text-align: left;
   cursor: pointer;
-  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
 }
 .pb-quiz-option:hover {
   border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
@@ -300,22 +314,23 @@
   height: 20px;
   border-radius: 50%;
   border: 2px solid var(--line);
-  transition: border-color .15s ease, background .15s ease;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 .pb-quiz-option.is-multi .pb-quiz-radio {
   border-radius: 6px;
 }
 .pb-quiz-radio svg {
   opacity: 0;
-  transition: opacity .12s ease;
+  transition: opacity 0.12s ease;
 }
 .pb-quiz-option:hover .pb-quiz-radio {
   border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
 }
 .pb-quiz-option.is-active .pb-quiz-radio {
   border-color: var(--brand);
-  background:
-    radial-gradient(circle, var(--brand) 0 42%, transparent 46%);
+  background: radial-gradient(circle, var(--brand) 0 42%, transparent 46%);
 }
 .pb-quiz-option.is-multi.is-active .pb-quiz-radio {
   background: var(--brand);
@@ -342,7 +357,7 @@
   font-size: 15px;
   color: var(--muted);
   cursor: pointer;
-  transition: color .15s ease;
+  transition: color 0.15s ease;
 }
 .pb-quiz-back:hover {
   color: var(--ink);
@@ -356,12 +371,14 @@
   font-size: 15px;
   color: #fff;
   background: linear-gradient(140deg, var(--brand), var(--brand-2));
-  box-shadow: 0 10px 22px rgba(14, 90, 74, .26);
+  box-shadow: 0 10px 22px rgba(14, 90, 74, 0.26);
   cursor: pointer;
-  transition: transform .12s ease, box-shadow .2s ease;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.2s ease;
 }
 .pb-quiz-continue:hover:not(:disabled) {
-  box-shadow: 0 14px 30px rgba(14, 90, 74, .32);
+  box-shadow: 0 14px 30px rgba(14, 90, 74, 0.32);
 }
 .pb-quiz-continue:active:not(:disabled) {
   transform: translateY(1px);
@@ -395,7 +412,7 @@
   border-radius: 50%;
   border: 4px solid color-mix(in srgb, var(--brand) 14%, #fff);
   border-top-color: var(--brand-2);
-  animation: pb-spin .8s linear infinite;
+  animation: pb-spin 0.8s linear infinite;
 }
 @keyframes pb-spin {
   to {
@@ -430,7 +447,7 @@
   align-items: center;
   gap: 12px;
   color: var(--muted);
-  animation: pb-row-in .35s ease both;
+  animation: pb-row-in 0.35s ease both;
 }
 .pb-build-row.is-done {
   color: var(--ink);
@@ -454,12 +471,16 @@
   border-radius: 50%;
   border: 2px solid color-mix(in srgb, var(--brand-2) 45%, var(--line));
   background: transparent;
-  transition: background .3s ease, border-color .3s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
 }
 .pb-build-check svg {
   opacity: 0;
-  transform: scale(.6);
-  transition: opacity .2s ease, transform .2s ease;
+  transform: scale(0.6);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 .pb-build-row.is-done .pb-build-check {
   border-color: var(--save);
@@ -498,7 +519,7 @@
   border-radius: 16px;
   color: #fff;
   background: linear-gradient(140deg, var(--brand), var(--brand-2));
-  box-shadow: 0 10px 24px rgba(14, 90, 74, .28);
+  box-shadow: 0 10px 24px rgba(14, 90, 74, 0.28);
 }
 .pb-cap-title {
   margin: 24px 0 0;
@@ -521,11 +542,13 @@
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--card);
-  box-shadow: var(--shadow-sm, 0 1px 2px rgba(31, 20, 16, .05));
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(31, 20, 16, 0.05));
   font-family: var(--font-body);
   font-size: 16px;
   color: var(--ink);
-  transition: border-color .15s ease, box-shadow .15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .pb-cap-input::placeholder {
   color: color-mix(in srgb, var(--muted) 65%, #fff);
@@ -546,12 +569,14 @@
   font-size: 16px;
   color: #fff;
   background: linear-gradient(140deg, var(--brand), var(--brand-2));
-  box-shadow: 0 12px 26px rgba(14, 90, 74, .26);
+  box-shadow: 0 12px 26px rgba(14, 90, 74, 0.26);
   cursor: pointer;
-  transition: transform .12s ease, box-shadow .2s ease;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.2s ease;
 }
 .pb-cap-submit:hover:not(:disabled) {
-  box-shadow: 0 16px 34px rgba(14, 90, 74, .32);
+  box-shadow: 0 16px 34px rgba(14, 90, 74, 0.32);
 }
 .pb-cap-submit:active:not(:disabled) {
   transform: translateY(1px);
@@ -577,7 +602,7 @@
   font-size: 14px;
   color: var(--brand);
   cursor: pointer;
-  transition: color .15s ease;
+  transition: color 0.15s ease;
 }
 .pb-cap-skip:hover {
   color: var(--brand-2);
@@ -623,12 +648,14 @@
   font-size: 16px;
   color: #fff;
   background: linear-gradient(140deg, var(--brand), var(--brand-2));
-  box-shadow: 0 12px 26px rgba(14, 90, 74, .28);
+  box-shadow: 0 12px 26px rgba(14, 90, 74, 0.28);
   cursor: pointer;
-  transition: transform .12s ease, box-shadow .2s ease;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.2s ease;
 }
 .pb-done-cta:hover {
-  box-shadow: 0 16px 34px rgba(14, 90, 74, .34);
+  box-shadow: 0 16px 34px rgba(14, 90, 74, 0.34);
 }
 .pb-done-cta:active {
   transform: translateY(1px);

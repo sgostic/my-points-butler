@@ -1,7 +1,9 @@
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+
 <!-- END:nextjs-agent-rules -->
 
 # Base instructions
@@ -27,7 +29,7 @@ Use these commands to verify:
 
 ## Product
 
-**My Points Butler** is a travel-rewards app built around the question *"Should I use my points now, or save them for a better trip later?"* The UI is a vibrant, light, sky-blue → cyan → green aesthetic (green = savings). The designs originate from Claude Design (claude.ai/design) handoff bundles and are recreated pixel-faithfully as React components.
+**My Points Butler** is a travel-rewards app built around the question _"Should I use my points now, or save them for a better trip later?"_ The UI is a vibrant, light, sky-blue → cyan → green aesthetic (green = savings). The designs originate from Claude Design (claude.ai/design) handoff bundles and are recreated pixel-faithfully as React components.
 
 - **Fonts:** Bricolage Grotesque (`--font-head`), Plus Jakarta Sans (`--font-body`), Space Grotesk (`--font-num`) — loaded via `next/font/google` in `app/layout.tsx` and exposed as CSS variables. Do not re-add `<link>`-based Google Fonts.
 - Components use the `pb-` class prefix and plain CSS files (not Tailwind utilities) to match the original design fidelity.
@@ -38,10 +40,10 @@ The homepage (`app/page.tsx`) is an A/B test. It's a Server Component that await
 
 - **`components/pages/index.ts`** — the variant registry: `VARIANTS` map (`a`/`b`/`c`/`d`), `DEFAULT_VARIANT`, and `resolveVariant()`. Wire new variants here.
 - **`components/pages/mode-nav.tsx`** — `PBModeNav`, the shared top nav with the 4-mode switch (Planner · Alerts · Goals · Discover), each linking to its `?variant=` param. Used by variants C and D.
-- **`components/pages/variant-a/`** — *Use-now planner* (the polished default). Files: `index.tsx` (page, `"use client"`), `data.ts` (the **canonical data source** — destinations with offers + discovery metadata (`tags`/`nights`/`vibe`), plus `verdictFor`/`summarize`/`fmt`/`tripCost`/`INTERESTS`), `world-map.tsx` (canvas dotted world map + clickable pins — **reusable**), `variant-a.css` (base styles, imported by all variants).
-- **`components/pages/variant-b/`** — *Wallet-matched Deal Alerts*. Reuses A's `data.ts`, `world-map.tsx`, and `variant-a.css`. Adds `wallet.ts` (wallet/pool/match logic) and `variant-b.css`. `variant-b.css` is the **shared "alerts" stylesheet** (wallet builder, fields, match badges, coverage bars, mode-switch) — C and D import it too.
-- **`components/pages/variant-c/`** — *Goal tracking* (save / earn / use). Reuses the map + data + `PBModeNav`; adds `goals.ts` (`pbPlanGoals`/`pbEta`) and `variant-c.css`. Imports `variant-a.css` + `variant-b.css` + `variant-c.css`.
-- **`components/pages/variant-d/`** — *Personalized trip discovery* (taste-driven feed, no map). Reuses data + `PBModeNav`; adds `variant-d.css`. Imports `variant-a.css` + `variant-b.css` + `variant-d.css`.
+- **`components/pages/variant-a/`** — _Use-now planner_ (the polished default). Files: `index.tsx` (page, `"use client"`), `data.ts` (the **canonical data source** — destinations with offers + discovery metadata (`tags`/`nights`/`vibe`), plus `verdictFor`/`summarize`/`fmt`/`tripCost`/`INTERESTS`), `world-map.tsx` (canvas dotted world map + clickable pins — **reusable**), `variant-a.css` (base styles, imported by all variants).
+- **`components/pages/variant-b/`** — _Wallet-matched Deal Alerts_. Reuses A's `data.ts`, `world-map.tsx`, and `variant-a.css`. Adds `wallet.ts` (wallet/pool/match logic) and `variant-b.css`. `variant-b.css` is the **shared "alerts" stylesheet** (wallet builder, fields, match badges, coverage bars, mode-switch) — C and D import it too.
+- **`components/pages/variant-c/`** — _Goal tracking_ (save / earn / use). Reuses the map + data + `PBModeNav`; adds `goals.ts` (`pbPlanGoals`/`pbEta`) and `variant-c.css`. Imports `variant-a.css` + `variant-b.css` + `variant-c.css`.
+- **`components/pages/variant-d/`** — _Personalized trip discovery_ (taste-driven feed, no map). Reuses data + `PBModeNav`; adds `variant-d.css`. Imports `variant-a.css` + `variant-b.css` + `variant-d.css`.
 
 CSS layering mirrors the original bundle: every variant loads `variant-a.css` (base) first; B/C/D then load `variant-b.css` (shared alerts components) before their own. When adding destinations or changing economics/metadata, edit `components/pages/variant-a/data.ts` — **all four variants consume it**. Reuse `world-map.tsx`, `mode-nav.tsx`, and the shared stylesheets rather than duplicating.
 
