@@ -6,23 +6,25 @@
    Per-interaction events are tracked explicitly from each component's handler. */
 
 import { useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
-import { resolveVariant } from "@/components/pages";
+import { usePathname, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ensureSession, flush, registerVisit, setVariant, track } from "./client";
 import { trackMetaPixel } from "@/lib/meta-pixel";
+import type { VariantKey } from "./events";
 import { EVENTS } from "./events";
 
 const SCROLL_THRESHOLDS = [25, 50, 75, 100] as const;
+const HOMEPAGE_VARIANT: VariantKey = "c";
 
 export function AnalyticsProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const variant = resolveVariant(searchParams.get("variant") ?? undefined);
+  const variant = pathname === "/" ? HOMEPAGE_VARIANT : undefined;
   const startedAtRef = useRef<number>(0);
   const maxScrollRef = useRef<number>(0);
   const firedThresholdsRef = useRef<Set<number>>(new Set());
@@ -55,8 +57,7 @@ export function AnalyticsProvider({
       }
     }
     track(EVENTS.PAGE_VIEW, { variant });
-    // Intentionally run once per mount; variant changes within the SPA are
-    // reported via variant_switched from the nav, not a new page_view here.
+    // Intentionally run once per mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

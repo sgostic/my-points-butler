@@ -1,14 +1,10 @@
-/* Shared top nav with the 4-mode switch, linking the variants together.
-   Each mode points at its `?variant=` query param. */
+/* Shared top nav for the goals homepage. */
 
 import { PBNavMark } from "./nav-mark";
 import { PBShareButton } from "./share-button";
 import { fmt } from "./variant-a/data";
 
-export type ModeId = "planner" | "alerts" | "goals" | "discover";
-
 export function PBModeNav({
-  active,
   balance,
   balanceLabel = "Wallet",
   userEmail = "",
@@ -16,7 +12,6 @@ export function PBModeNav({
   onSignIn,
   onSignOut,
 }: {
-  active: ModeId;
   balance: number;
   balanceLabel?: string;
   userEmail?: string;
@@ -34,9 +29,7 @@ export function PBModeNav({
       </a>
       <div className="pb-nav-right">
         {userEmail ? <span className="pb-nav-user">{userEmail}</span> : null}
-        <PBShareButton
-          variant={active === "planner" ? "a" : active === "alerts" ? "b" : active === "goals" ? "c" : "d"}
-        />
+        <PBShareButton />
         <div className="pb-balance" title="Your points">
           <span className="pb-balance-label">{balanceLabel}</span>
           <span className="pb-balance-num">{fmt(balance)}</span>

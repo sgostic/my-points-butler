@@ -1,11 +1,5 @@
-import { VARIANTS, resolveVariant } from "@/components/pages";
+import { PBHomePage } from "@/components/pages/home-page";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const { variant } = await searchParams;
-  const SelectedVariant = VARIANTS[resolveVariant(variant)];
-  return <SelectedVariant />;
+export default function Home() {
+  return <PBHomePage />;
 }

@@ -13,31 +13,6 @@ import {
 const VISITOR_COOKIE = "pb_vid";
 const VISITOR_COOKIE_PUBLIC = "pb_vid_pub";
 const VISITOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 * 2; // ~2 years
-const VARIANT_COOKIE = "pb_variant";
-const VARIANT_COOKIE_MAX_AGE = VISITOR_COOKIE_MAX_AGE;
-const DEFAULT_VARIANT = "a";
-const VARIANTS = new Set(["a", "b", "c", "d"]);
-
-function asVariant(value: string | null | undefined) {
-  const normalized = value?.toLowerCase();
-  return normalized && VARIANTS.has(normalized) ? normalized : null;
-}
-
-function setVariantCookie(response: NextResponse, variant: string) {
-  response.cookies.set(VARIANT_COOKIE, variant, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: VARIANT_COOKIE_MAX_AGE,
-  });
-}
-
-function copyResponseCookies(source: NextResponse, target: NextResponse) {
-  source.cookies.getAll().forEach((cookie) => {
-    target.cookies.set(cookie);
-  });
-}
 
 /** Ensure the visitor cookies exist on the response, minting a new id if absent. */
 function ensureVisitorCookie(request: NextRequest, response: NextResponse) {
@@ -62,42 +37,11 @@ function ensureVisitorCookie(request: NextRequest, response: NextResponse) {
   });
 }
 
-function applyStickyVariant(request: NextRequest, response: NextResponse) {
-  if (request.nextUrl.pathname !== "/") return response;
-
-  const storedVariant = asVariant(request.cookies.get(VARIANT_COOKIE)?.value);
-  const requestedVariant = asVariant(request.nextUrl.searchParams.get("variant"));
-
-  // An explicit, valid ?variant always wins and (re)writes the remembered
-  // variant — so manually visiting another variant overwrites the first one.
-  if (requestedVariant) {
-    if (requestedVariant !== storedVariant) {
-      setVariantCookie(response, requestedVariant);
-    }
-    return response;
-  }
-
-  // No explicit variant: send returning visitors back to the one they first saw.
-  if (storedVariant) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.searchParams.set("variant", storedVariant);
-
-    const redirectResponse = NextResponse.redirect(redirectUrl);
-    copyResponseCookies(response, redirectResponse);
-    setVariantCookie(redirectResponse, storedVariant);
-    return redirectResponse;
-  }
-
-  // First-ever visit with no variant chosen: remember the default.
-  setVariantCookie(response, DEFAULT_VARIANT);
-  return response;
-}
-
 export async function updateSession(request: NextRequest) {
   if (!isSupabaseConfigured()) {
     const response = NextResponse.next({ request });
     ensureVisitorCookie(request, response);
-    return applyStickyVariant(request, response);
+    return response;
   }
 
   let supabaseResponse = NextResponse.next({
@@ -135,5 +79,5 @@ export async function updateSession(request: NextRequest) {
   // potential response re-creation inside setAll above.
   ensureVisitorCookie(request, supabaseResponse);
 
-  return applyStickyVariant(request, supabaseResponse);
+  return supabaseResponse;
 }

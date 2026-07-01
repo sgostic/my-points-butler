@@ -509,7 +509,6 @@ export default function VariantC() {
   return (
     <div id="top" className="pb-app">
       <PBModeNav
-        active="goals"
         balance={current}
         balanceLabel="Points"
         userEmail={auth.userEmail}

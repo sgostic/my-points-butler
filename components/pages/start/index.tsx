@@ -1,10 +1,12 @@
 "use client";
 
 /* My Points Butler — /start flow.
-   Two phases, UI only:
-   1. Hero — split layout recreated from the Claude Design handoff.
-   2. Quiz — one question per step with a progress bar, matching the second
-      handoff screen. Colors follow the project's cream/forest-green system. */
+   Four UI-only phases:
+   1. Hero
+   2. Quiz
+   3. Building
+   4. Email capture / skip
+   Colors follow the project's cream/forest-green system. */
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -19,6 +21,7 @@ import {
   trackOnboardingSkipped,
   trackOnboardingExited,
 } from "@/lib/analytics";
+import { markOnboardingCompleted } from "@/lib/onboarding";
 import "./start.css";
 
 type Question = {
@@ -426,11 +429,13 @@ function PBEmail({ onDone }: { onDone: () => void }) {
     e.preventDefault();
     if (!valid) return;
     trackOnboardingEmail(email.trim());
+    markOnboardingCompleted();
     onDone();
   };
 
   const skip = () => {
     trackOnboardingSkipped(QUESTIONS.length + 1);
+    markOnboardingCompleted();
     onDone();
   };
 
@@ -493,12 +498,12 @@ type Phase = "hero" | "quiz" | "building" | "email";
 export function PBStart() {
   const [phase, setPhase] = useState<Phase>("hero");
   const router = useRouter();
-  const goHome = () => router.push("/");
+  const goHome = () => router.replace("/");
 
-  // Top-nav "Exit" — record where the visitor bailed, then leave.
+  // Top-nav "Exit" — record where the visitor bailed, then reset the funnel.
   const quit = (from: Phase, step?: number) => {
     trackOnboardingExited(from, step);
-    goHome();
+    setPhase("hero");
   };
 
   const start = () => {

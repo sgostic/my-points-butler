@@ -1,17 +1,18 @@
 "use client";
 
-import { trackShare, type VariantKey } from "@/lib/analytics";
+import { trackShare } from "@/lib/analytics";
 
-function buildShareUrl(variant: VariantKey) {
-  const url = new URL(window.location.href);
-  url.searchParams.set("variant", variant);
+const HOMEPAGE_VARIANT = "c" as const;
+
+function buildShareUrl() {
+  const url = new URL("/", window.location.origin);
   url.searchParams.set("utm_source", "homepage_share");
   return url.toString();
 }
 
-export function PBShareButton({ variant }: { variant: VariantKey }) {
+export function PBShareButton() {
   const onShare = async () => {
-    const shareUrl = buildShareUrl(variant);
+    const shareUrl = buildShareUrl();
 
     if (navigator.share) {
       try {
@@ -19,7 +20,7 @@ export function PBShareButton({ variant }: { variant: VariantKey }) {
           title: "My Points Butler",
           url: shareUrl,
         });
-        trackShare("native", variant);
+        trackShare("native", HOMEPAGE_VARIANT);
         return;
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
@@ -28,9 +29,9 @@ export function PBShareButton({ variant }: { variant: VariantKey }) {
 
     try {
       await navigator.clipboard.writeText(shareUrl);
-      trackShare("clipboard", variant);
+      trackShare("clipboard", HOMEPAGE_VARIANT);
     } catch {
-      trackShare("unsupported", variant);
+      trackShare("unsupported", HOMEPAGE_VARIANT);
     }
   };
 
