@@ -8,7 +8,7 @@
    4. Email capture / skip
    Colors follow the project's cream/forest-green system. */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { PBNavMark } from "../nav-mark";
@@ -21,7 +21,6 @@ import {
   trackOnboardingSkipped,
 } from "@/lib/analytics";
 import { markOnboardingCompleted } from "@/lib/onboarding";
-import { trackMetaPixel } from "@/lib/meta-pixel";
 import "./start.css";
 
 type Question = {
@@ -427,7 +426,7 @@ function PBBuilding({ onDone }: { onDone: () => void }) {
   );
 }
 
-function PBEmail({ onDone }: { onDone: () => void }) {
+function PBEmail({ onDone }: { onDone: (submitted: boolean) => void }) {
   const [email, setEmail] = useState("");
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
@@ -435,15 +434,14 @@ function PBEmail({ onDone }: { onDone: () => void }) {
     e.preventDefault();
     if (!valid) return;
     trackOnboardingEmail(email.trim());
-    trackMetaPixel("completedMailSubmission");
     markOnboardingCompleted();
-    onDone();
+    onDone(true);
   };
 
   const skip = () => {
     trackOnboardingSkipped(QUESTIONS.length + 1);
     markOnboardingCompleted();
-    onDone();
+    onDone(false);
   };
 
   return (
@@ -505,7 +503,26 @@ type Phase = "hero" | "quiz" | "building" | "email";
 export function PBStart() {
   const [phase, setPhase] = useState<Phase>("hero");
   const router = useRouter();
-  const goHome = () => router.replace("/");
+  const pixelFiredRef = useRef(false);
+
+  useEffect(() => {
+    if (pixelFiredRef.current) return;
+    pixelFiredRef.current = true;
+    let cancelled = false;
+    const tryFire = (attempt = 0) => {
+      if (cancelled) return;
+      if (typeof window.fbq === "function") {
+        window.fbq("track", "PageView");
+        return;
+      }
+      if (attempt < 50) setTimeout(() => tryFire(attempt + 1), 100);
+    };
+    tryFire();
+    return () => { cancelled = true; };
+  }, []);
+
+  const goHome = (submitted: boolean) =>
+    router.replace(submitted ? "/thankyou" : "/");
 
   const start = () => {
     trackOnboardingStarted();
@@ -527,7 +544,7 @@ export function PBStart() {
           {phase === "building" ? (
             <PBBuilding onDone={() => setPhase("email")} />
           ) : (
-            <PBEmail onDone={goHome} />
+            <PBEmail onDone={(submitted) => goHome(submitted)} />
           )}
         </>
       )}
